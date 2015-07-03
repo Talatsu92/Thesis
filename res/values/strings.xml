@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE xml>
+<resources>
+
+    <string name="app_name">LifeCycle</string>
+    <string name="action_settings">Settings</string>
+
+    <!-- Main Menu Strings -->
+    <string name="title_activity_main_menu">Main Menu</string>
+    <string name="start">Start Monitor</string>
+    <string name="monitor">Monitoring...</string>
+    <string name="user">User</string>
+    <string name="contacts">Contacts</string>
+    <string name="help">Help</string>
+    <string name="about">About</string>
+    <string name="start_desc">Starts Sensor Monitoring</string>
+    <string name="aboutDialog">Authors: Rafael Bacus, Carl Patrick Agbisit\n\n Version: 0.1 </string>
+    <string name="redirectUser">This is your first time running this app! You will be redirected to the User Menu for first-use setup.</string>
+	<string name="preMonitor">Please secure the device in a safe location. Accident monitoring will begin in 45 seconds.</string>
+    
+    <!-- User Menu Strings -->
+    <string name="user_pref">filingkey</string>
+    <string name="title_activity_user_menu">User Menu</string>
+    <string name="username">Name: </string>
+    <string name="age">Age: </string>
+    <string name="blood">Bloodtype: </string>
+
+    <string-array name="h_array">
+        <item>ft, in</item>
+        <item>cm</item>
+    </string-array>
+    <string-array name="blood_array">
+        <item>O</item>
+        <item>A</item>
+        <item>B</item>
+        <item>AB</item>
+    </string-array>
+    <string-array name="antigens">
+        <item>+</item>
+        <item>-</item>
+    </string-array>
+
+    <string name="height">Height: </string>
+    <string name="weight">Weight: </string>
+    <string name="multi_input1">Medications</string>
+    <string name="multi_input2">Conditions</string>
+    <string name="multi_input3">Allergies</string>
+    <string name="user_submit">Save</string>
+    <string name="user_clear">Clear</string>
+    <string name="redirectContacts">Now to the Contacts Menu to set your contact numbers.</string>
+
+    <!-- Contacts Menu Strings -->
+    <string name="title_activity_contacts_menu">Emergency Contacts</string>
+    <string name="add_emergency_contact">Add</string>
+    <string name="delete_emergency_contact">Delete</string>
+    <string name="title_dialog_preference">Contact Information</string>
+    <string name="select_a_number">Select a number</string>
+    <string name="generic_message">Help! This is not a test. I\'ve been in a motorcycle accident. Try and contact me as soon as possible. </string>
+    <string name="generic_smartphone">For smartphone users, click here to view the location of the accident.</string>
+    <string name="name">Name: </string>
+    <string name="number">Number: </string>
+    <string name="message">Message: </string>
+    <string name="contact_submit">Save</string>
+
+    <!-- Help Menu Strings -->
+    <string name="title_activity_help_menu">Help Menu</string>
+    <string name="button_1">About User Menu</string>
+    <string name="button_2">About Contacts Menu</string>
+    <string name="button_3">About Permissions</string>
+    <string name="title_activity_test">TestActivity</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="title_activity_contact_item">ContactItem</string>
+    <string name="title_activity_accel_test">AccelTest</string>
+    
+    <!-- SMS Strings -->
+    <string name="title_activity_sms_test">SMS Test</string>
+    <string name="nump">Destination Number</string>
+    <string name="msgp">Message</string>
+    <string name="smsbtn">Send Message</string>
+    
+
+</resources>

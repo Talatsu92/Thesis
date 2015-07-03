@@ -1,0 +1,141 @@
+Android Processes, Threads, & Services
+    Looper
+        Executes everything
+
+    Message Queue
+        Broadcast Receiver
+        Activity
+        Service
+
+    Content Provider runs synchronously
+
+    Every process has one main thread
+
+    UI elements updated on the main thread
+
+    Long running operations
+        When the UI thread is blocked, no events can be dispatched, including drawing events
+        Use additional threads for tasks longer than 5 seconds
+        Can't modify UI from background thread
+        Use services
+   
+   
+Android Threading Architecture
+    For every Android Process:
+        Internal Components:
+            Activities
+            Broadcast Receivers
+            Services
+            Content Providers
+            
+        External Components
+            
+        Main Thread\Looper
+        Message Queue
+        
+        Thread Pool
+            Service/Content Provider from external components being run here
+            
+    Multithreading methods:
+        void runOnUiThread(Runnable runnable) [belongs in Activity class]
+            runs the specified action on the UI thread
+            if the current thread is the UI thread, action is executed immediately
+            if not, action is posted to event queue of UI thread
+        
+        boolean post(Runnable runnable) [belongs in View class]
+            causes the Runnable to be added to the message queue
+            the runnable will be run on the UI thread
+            returns true if the Runnable was successfully placed in message queue
+            
+        boolean postDelayed(Runnable runnable, long delayMilliseconds) [View class]
+            causes the Runnable to be added to the message queue
+            the runnable will be run on the UI thread
+            returns true if the Runnable was successfully placed in message queue
+            returns false on failure, usually because looper processing the message queue is exiting
+            
+        void setThreadPriority(int priority) [Process class]
+            set the priority of the calling thread, based on Linux priorities
+            -20 = highest, 19 = lowest
+            at the beginning of the run(), set the thread to use background priority by calling Process.setThreadPriority() with THREAD_PRIORITY_BACKGROUND
+            reduces resource competition between Runable object's thread and UI thread    
+            
+
+Android AsyncTask
+    Challenges
+        Main thread should be available to handle events from different Views and components
+        ActivityManager and WindowManager monitor the app for responsiveness
+        If any task takes more than 5 seconds on the main thread for an Activity, ANR error is triggered
+        Separate plain threads with/without handlers can be used for performing long running operations
+            Only good for 100ms to a few seconds
+            Not good for operations that take several seconds; Adroid OS may kill those threads
+
+    Why use AsyncTask?
+        You don't need to:
+            Create your own background thread
+            Terminate that background thread at an appropriate time
+            Call methods to arrange code to be processed on UI thread (ex: updating a progress bar in response to downloaded bytes)
+            Manage message queues or handlers to the background thread
+            AsyncTask handles all the steps for doing work on the UI thread vs on a backgroudn thread
+            
+    How to use AsyncTask?
+        Create a subclass of AsyncTask
+        Override one or more AsyncTask methods to
+            Do work in side the background thread
+            Handle UI updates on the main thread
+            When needed, create an instance of the AsyncTask subclass and call execute() to have it begin doing its work
+            
+            
+    How does AsyncTask work?
+    Execute() -> onPreExecute() -> doInBackground() ->
+    publishProgress() -> onProgressUpdate() -> Result is returned ->
+    onPostExecute()
+            
+    3 parameteres to be supplied to AsyncTask class
+        Params, the type of parameters sent to the task upon execution
+            ex: URL(s) of site to download from
+        Progress, the type of information that is passed within the task to indicate progreses
+            ex: integer that represents the precentage of file downloaded so far
+        Result, the type of the result of the background computation
+            ex: the final String containing data downloaded from the Internet
+            
+    4 parts of an AsyncTask
+        onPreExecute(), invoked on the UI thread before task is executed
+            normally used to setup the task, for instance by showing a progress bar in the UI
+        doInBackground(Params...) [ONLY method that runs on background thread], invoked on the background thread immediately after onPreExecute() finishes
+            this step used to perform background computatin that can take a long time
+            the parameters of the asynchronous task are passed to this step
+            the result of the computation must be returned by this step and will be passed back to onPostExecute()
+            this step can also use publishProgress(Progress...) [background thread] to publish one or more units of progress
+                onProgressUpdate(Progress...) [UI thread] lets you update the UI (ex: setting the progress bar's current value)
+        onPostExecute(Result), invoked on the UI thread after background computation finishes
+            result of the background computation is passed to this step as a parameter
+        
+    Rules of using an AsyncTask
+        The AsyncTask class must be loaded on the UI thread
+        The task instance must be creaed on the UI thread
+        execute(Params...) must be invoked on the UI thread
+        Do not call onPreExecute(), onPostExecute(Result), doInBackground(Params...), onProgressUpdate(Progress...) manually
+        The task can be executed only once (an exception will be thrown if a second execution is attempted)
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            

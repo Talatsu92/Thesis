@@ -1,0 +1,49 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/ContactsLayout"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    tools:context="${relativePackage}.${activityClass}" >
+
+    <ListView
+        android:id="@android:id/list"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" >
+    </ListView>
+
+    <LinearLayout
+        android:id="@+id/addDeleteButtons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+
+        <!--  -->
+
+        <Button
+            android:id="@+id/addContact"
+            style="android:attr/buttonBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="1sp"
+            android:layout_weight="1"
+            android:onClick="openPhonebook"
+            android:height="50sp"
+            android:text="@string/add_emergency_contact" />
+
+        <ToggleButton
+            android:id="@+id/deleteContact"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="6sp"
+            android:layout_weight="1"
+            android:width="50sp"
+            android:height="50sp"
+            android:textOff="Delete"
+            android:textOn="Delete..." 
+            android:onClick="toggle"/>
+
+    </LinearLayout>
+
+</LinearLayout>
