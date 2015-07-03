@@ -1,0 +1,112 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="com.rafcarl.lifecycle.SMSTest" >
+
+    <EditText
+        android:id="@+id/numEnt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:ems="10"
+        android:hint="@string/nump"
+        android:inputType="phone" >
+
+        <requestFocus />
+    </EditText>
+
+    <EditText
+        android:id="@+id/msgEnt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/numEnt"
+        android:layout_below="@+id/numEnt"
+        android:ems="10"
+        android:hint="@string/msgp"
+        android:minLines="3" />
+
+    <Button
+        android:id="@+id/smsBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/msgEnt"
+        
+        android:layout_margin="5dp"
+        android:onClick="sendSMS"
+        android:text="@string/smsbtn" />
+    
+    <Button 
+        android:id="@+id/locationBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/msgEnt"
+        android:layout_toRightOf="@id/smsBtn"
+        
+        android:layout_margin="5dp"
+        android:text="Location" />
+
+    <TextView
+        android:id="@+id/long_l"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/msgEnt"
+        android:layout_centerVertical="true"
+        android:text="Longitude:"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <TextView
+        android:id="@+id/longi"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/long_l"
+        android:layout_centerHorizontal="true"
+        android:text="" />
+
+    <TextView
+        android:id="@+id/lat_l"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/long_l"
+        android:layout_below="@+id/long_l"
+        android:text="Latitude:"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <TextView
+        android:id="@+id/lati"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/lat_l"
+        android:layout_centerHorizontal="true"
+        android:text="" />
+    
+    <TextView
+        android:id="@+id/type_l"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/long_l"
+        android:layout_below="@id/lat_l"
+        android:text="Type:"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+    
+    <TextView
+        android:id="@+id/typei"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@id/type_l"
+        android:layout_centerHorizontal="true"
+        android:text=""/>
+    
+    <TextView
+        android:id="@+id/addressi"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/type_l"
+        android:text=""/>
+
+</RelativeLayout>

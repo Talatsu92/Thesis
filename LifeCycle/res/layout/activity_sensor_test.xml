@@ -1,0 +1,78 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="com.rafcarl.lifecycle.SensorTest" >
+
+    <TextView
+        android:id="@+id/accelValues"
+        style="@android:style/TextAppearance.Small"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:text="" />
+
+    <TextView
+        android:id="@+id/accelInfo"
+        style="@android:style/TextAppearance.Small"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/accelValues"
+        android:text="" />
+
+    <TextView
+        android:id="@+id/gyroValues"
+        style="@android:style/TextAppearance.Small"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/accelInfo"
+        android:layout_marginBottom="20dp"
+        android:text="" />
+    
+    <TextView
+        android:id="@+id/gyroInfo"
+        style="@android:style/TextAppearance.Small"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/gyroValues"
+        android:text="" />
+
+    <LinearLayout
+        android:id="@+id/Menus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/accelStart"
+            style="@android:attr/buttonBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Accel" />
+
+        <Button
+            android:id="@+id/gyroStart"
+            style="@android:attr/buttonBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="gyroStart"
+            android:text="Gyro" />
+
+        <Button
+            android:id="@+id/sensorStop"
+            style="@android:attr/buttonBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="sensorStop"
+            android:text="Stop" />
+    </LinearLayout>
+
+</RelativeLayout>

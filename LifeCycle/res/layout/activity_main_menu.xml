@@ -1,0 +1,92 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/MainLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="${relativePackage}.${activityClass}" >
+
+    <TextView
+        android:id="@+id/AppName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="60dp"
+        android:text="@string/app_name" />
+
+    <ImageButton
+        android:id="@+id/StartButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/AppName"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="50dp"
+        android:contentDescription="@string/start_desc" />
+
+    <TextView
+        android:id="@+id/StartText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/StartButton"
+        android:layout_centerHorizontal="true"
+        android:text="@string/start" />
+
+    <LinearLayout
+        android:id="@+id/Menus"
+        style="?android:attr/buttonBarButtonStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="50dp" >
+
+        <ImageView
+            android:id="@+id/UserMenu"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:onClick="goToUser"
+            android:src="@drawable/user_icon" />
+
+        <ImageView
+            android:id="@+id/ContactsMenu"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:onClick="goToContacts"
+            android:src="@drawable/contacts_icon" />
+
+        <ImageView
+            android:id="@+id/HelpMenu"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:onClick="goToHelp"
+            android:src="@drawable/help_icon" />
+
+        <ImageView
+            android:id="@+id/About"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:onClick="openAboutDialog"
+            android:src="@drawable/about_icon" />
+
+        <!--
+        <Button
+            android:id="@+id/smsTest"
+            style="@android:attr/buttonBarButtonStyle" 
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="goToSMS"
+            android:text="SMS"/>
+        -->
+
+    </LinearLayout>
+
+</RelativeLayout>
