@@ -26,8 +26,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/numEnt"
+        android:layout_alignParentRight="true"
         android:layout_below="@+id/numEnt"
-        android:ems="10"
         android:hint="@string/msgp"
         android:minLines="3" />
 
@@ -36,32 +36,49 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/msgEnt"
-        
         android:layout_margin="5dp"
         android:onClick="sendSMS"
         android:text="@string/smsbtn" />
-    
-    <Button 
+
+    <Button
         android:id="@+id/locationBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/msgEnt"
-        android:layout_toRightOf="@id/smsBtn"
-        
         android:layout_margin="5dp"
-        android:text="Location" />
+        android:layout_toRightOf="@id/smsBtn"
+        android:text="Update Location" />
+
+    <TextView
+        android:id="@+id/lat_l"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/msgEnt"
+        android:layout_below="@+id/smsBtn"
+        android:layout_marginTop="30dp"
+        android:text="Latitude:"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <TextView
+        android:id="@+id/lat_i"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/lat_l"
+        android:layout_centerHorizontal="true"
+        android:text="" />
 
     <TextView
         android:id="@+id/long_l"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/msgEnt"
+        android:layout_alignLeft="@+id/lat_l"
+        android:layout_below="@+id/lat_l"
         android:layout_centerVertical="true"
         android:text="Longitude:"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <TextView
-        android:id="@+id/longi"
+        android:id="@+id/long_i"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBaseline="@+id/long_l"
@@ -69,44 +86,10 @@
         android:text="" />
 
     <TextView
-        android:id="@+id/lat_l"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/long_l"
-        android:layout_below="@+id/long_l"
-        android:text="Latitude:"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
-
-    <TextView
-        android:id="@+id/lati"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/lat_l"
-        android:layout_centerHorizontal="true"
-        android:text="" />
-    
-    <TextView
-        android:id="@+id/type_l"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/long_l"
-        android:layout_below="@id/lat_l"
-        android:text="Type:"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
-    
-    <TextView
-        android:id="@+id/typei"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@id/type_l"
-        android:layout_centerHorizontal="true"
-        android:text=""/>
-    
-    <TextView
         android:id="@+id/addressi"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/type_l"
-        android:text=""/>
+        android:layout_below="@id/long_l"
+        android:text="" />
 
 </RelativeLayout>

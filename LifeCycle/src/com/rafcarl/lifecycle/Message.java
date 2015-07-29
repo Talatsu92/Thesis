@@ -4,17 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
-import android.app.AlertDialog;
+import android.content.Context;
 import android.database.Cursor;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
-import android.net.Uri;
 import android.telephony.SmsManager;
 import android.util.Log;
-import android.view.View;
-import android.widget.ProgressBar;
-import android.widget.TextView;
-import android.widget.Toast;
 
 public class Message extends Activity{
 	List<Contact> ContactList;
@@ -29,8 +24,6 @@ public class Message extends Activity{
 	String latitudeDMS;
 	String longitudeDMS;
 	
-
-	
 	public Message(LocationManager locationManager, ConnectivityManager connectivityManager) {
 		ContactList = new ArrayList<Contact>();
 		
@@ -41,7 +34,15 @@ public class Message extends Activity{
 	//Location-related methods
 	public int getLocation(){
 		Log.i(LOG, "getLocation() enter");
-		LocationTracker locationTracker = new LocationTracker(locationManager, connectivityManager);
+		LocationTracker locationTracker;
+		if(locationManager != null && connectivityManager != null){
+			locationTracker = new LocationTracker(locationManager, connectivityManager);
+		}
+		else{
+			locationTracker = new LocationTracker(
+					(LocationManager) getSystemService(Context.LOCATION_SERVICE), 
+					(ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE));
+		}
 		Log.i(LOG, "instantiate new locationTracker object");
 		if(locationTracker.canGetLocation()){
 			Log.i(LOG, "locationTracker.canGetLocation()");

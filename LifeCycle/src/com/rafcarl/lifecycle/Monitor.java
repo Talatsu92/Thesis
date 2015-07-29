@@ -52,6 +52,7 @@ public class Monitor extends Activity implements SensorEventListener{
 		connectivityManager = cM;
 		activity = act;
 		
+		inflater = (LayoutInflater) c.getSystemService(LAYOUT_INFLATER_SERVICE);
 		View view = (LinearLayout) inflater.inflate(R.layout.dialog_accident, new LinearLayout(c));
 		
 		builder = new AlertDialog.Builder(c);

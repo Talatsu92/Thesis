@@ -1,18 +1,19 @@
 package com.rafcarl.lifecycle;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 import android.app.Activity;
 import android.content.Context;
+import android.database.Cursor;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.telephony.SmsManager;
 import android.util.Log;
@@ -25,11 +26,16 @@ import android.widget.Toast;
 public class SMSTest extends Activity implements LocationListener{
 
 	private static Context context;
+	List<Contact> ContactList;
 	EditText num, msg;
 	TextView lat, lon, addr;
 	LocationManager locationManager;
+	ConnectivityManager connectivityManager;
+	LocationTracker locationTracker;
 	double latitude;
 	double longitude;
+	String latitudeDMS;
+	String longitudeDMS;
 	long time = 0;
 	float distance = 0;
 	Location gpsLocation;
@@ -46,19 +52,40 @@ public class SMSTest extends Activity implements LocationListener{
 		double latitude;
 		double longitude;
 		context = getApplicationContext();
+		
+		ContactList = new ArrayList<Contact>();
+		
+		locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+		connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+		locationTracker = new LocationTracker(locationManager,connectivityManager);
+		Log.i("LOCTRACKER", ""+locationTracker);
+
+		num = (EditText)findViewById(R.id.numEnt);
+		msg = (EditText)findViewById(R.id.msgEnt);
+		lat = (TextView)findViewById(R.id.lat_i);
+		lon = (TextView)findViewById(R.id.long_i);
+		addr = (TextView)findViewById(R.id.addressi);
 
 		Button location = (Button) findViewById(R.id.locationBtn);
 		location.setOnClickListener(new View.OnClickListener() {
-			
 			@Override
 			public void onClick(View v) {
-/*				TextView textLong = (TextView) findViewById(R.id.longi);
-				TextView textLat = (TextView) findViewById(R.id.lati);
-				TextView textAddr = (TextView) findViewById(R.id.addressi);
-				TextView textType = (TextView) findViewById(R.id.typei);*/
-				locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-				ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+				if(locationTracker.canGetLocation()){
+					Log.i("LOCATION", "LOCATION POSSIBLE");
+					locationTracker.getLocation();
+					Double latt = locationTracker.getLatitude();
+					Double lonn = locationTracker.getLongitude();
+					Log.i("LATITUDE", ""+latt);
+					Log.i("LONGITUDE", ""+lonn);
+					lat.setText(Double.toString(latt));
+					lon.setText(Double.toString(lonn));
+					addr.setText(getStreetAddress());
+				}
+				else{
+					locationTracker.showSettingsAlert();
+				}
 				
+				/*
 				NetworkInfo mWifi = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 				NetworkInfo mMobile = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
 				
@@ -75,24 +102,26 @@ public class SMSTest extends Activity implements LocationListener{
 				else{
 					Toast.makeText(getBaseContext(), "Cannot determine location at this time", Toast.LENGTH_SHORT).show();
 				}
-				
-/*				LocationTracker locationTracker = new LocationTracker(textLong, textLat, textAddr, textType, locationManager, connectivityManager, SMSTest.this);
-				if(locationTracker.canGetLocation()){
-					locationTracker.getLocation();
-				}
-				else{
-					Toast.makeText(getBaseContext(), "Cannot determine location at this time", Toast.LENGTH_SHORT).show();
-				}
 				*/
 			}
 		});
 		
-		num = (EditText)findViewById(R.id.numEnt);
-		msg = (EditText)findViewById(R.id.msgEnt);
-		lat = (TextView)findViewById(R.id.lati);
-		lon = (TextView)findViewById(R.id.longi);
-		addr = (TextView)findViewById(R.id.addressi);
+		if(locationTracker.canGetLocation()){
+			Log.i("LOCATION", "LOCATION POSSIBLE");
+			locationTracker.getLocation();
+			latitude = locationTracker.getLatitude();
+			longitude = locationTracker.getLongitude();
+			Log.i("LATITUDE", "" + latitude);
+			Log.i("LONGITUDE", "" + longitude);
+			lat.setText(Double.toString(latitude));
+			lon.setText(Double.toString(longitude));
+			addr.setText(getStreetAddress());
+		}
+		else{
+			locationTracker.showSettingsAlert();
+		}
 
+		/*
 		GPSLocationTrackerTest locationTracker = new GPSLocationTrackerTest(SMSTest.this);
 		if(locationTracker.canGetLocation()){
 			if(locationTracker.getLocation() == null){
@@ -131,6 +160,7 @@ public class SMSTest extends Activity implements LocationListener{
 		else{
 			locationTracker.showSettingsAlert();
 		}
+		*/
 	}
 
 	public void sendSMS(View v)
@@ -140,11 +170,26 @@ public class SMSTest extends Activity implements LocationListener{
 		
 		try{
 			SmsManager sms = SmsManager.getDefault();
-			sms.sendTextMessage(phoneNumber, null, message, null, null);
+			String mapsLink = "http://maps.google.com/maps?saddr=" + latitude + "," + longitude;
+			String additional = "\n\n To view the location on Google Maps, follow this link:  " + mapsLink;
+			
+			sms.sendTextMessage(phoneNumber, null, message + additional, null, null);
 			Toast.makeText(getApplicationContext(), "Wee", Toast.LENGTH_SHORT).show();
 		}catch(Exception e){
 			Toast.makeText(getApplicationContext(), "Aww", Toast.LENGTH_SHORT).show();
 		}
+
+		/*SmsManager sms = SmsManager.getDefault();
+		StringBuilder message;
+		String mapsLink = "http://maps.google.com/maps?saddr=" + latitude + "," + longitude;
+		String additional = "\n\n To view the location on Google Maps, follow this link:  " + mapsLink;
+		for(Contact contact : ContactList) {
+			phoneNumber = contact.getNumber();
+			message = new StringBuilder(contact.getMessage());
+			message.append(additional);
+			
+			Log.i("CONTACT", ""+contact.getName()+";"+phoneNumber);
+		}*/
 	}
 	
 	public double[] getCoordinates(){
@@ -190,10 +235,8 @@ public class SMSTest extends Activity implements LocationListener{
 	
 	public String getStreetAddress(){
 		Log.i("LOG", "getStreetAddress() enter");
-		latitude = mLocation.getLatitude();
-		longitude = mLocation.getLongitude();
 
-		Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
+		Geocoder geocoder = new Geocoder(this, Locale.getDefault());
 		List<Address> addresses = null;
 		try {
 			addresses = geocoder.getFromLocation(latitude, longitude, 1);
@@ -210,6 +253,56 @@ public class SMSTest extends Activity implements LocationListener{
 		}
 		
 		return streetAddress;
+	}
+	
+	public void getContacts(){
+		Cursor cursor;
+		DBHelper.db = DBHelper.dbHelper.getReadableDatabase();
+		cursor = DBHelper.db.rawQuery("SELECT * FROM LifeCycleTable", null);
+
+		if(cursor.moveToFirst()){
+			while(!cursor.isAfterLast()){
+				Contact contact = new Contact();
+				contact.setName(cursor.getString(cursor.getColumnIndex(DBHelper.NAME)));
+				contact.setNumber(cursor.getString(cursor.getColumnIndex(DBHelper.NUMBER)));
+				contact.setMessage(cursor.getString(cursor.getColumnIndex(DBHelper.MESSAGE)));
+				contact.setId(cursor.getString(cursor.getColumnIndex(DBHelper.CONTACT_ID)));
+				
+				ContactList.add(contact);
+
+				cursor.moveToNext();
+			}
+		}
+		cursor.close();
+	}
+	
+	public void convertToDMS(){
+		short degree;
+		byte minute;
+		float second;
+		float temp;
+
+		/*degree = (short) ((latitude >= 0) ? Math.floor(latitude) : Math.ceil(latitude));
+		temp = (float) ((latitude - degree) * 60);
+		minute = (byte) Math.floor(temp);
+		temp = (temp - minute) * 60;
+		second = Math.round(temp);*/
+
+		degree = (short) ((latitude >= 0) ? Math.floor(latitude) : Math.ceil(latitude));
+		temp = (float) (Math.abs(latitude) - Math.abs(degree)) * 60;
+		minute = (byte) Math.floor(temp);
+		temp -= minute;
+		second = temp * 60;
+		
+		latitudeDMS = degree + "‹" + minute + "'" + second + "\"";
+		
+		degree = (short) ((longitude >= 0) ? Math.floor(longitude) : Math.ceil(longitude));
+		temp = (float) (Math.abs(longitude) - Math.abs(degree)) * 60;
+		minute = (byte) Math.floor(temp);
+		temp -= minute;
+		second = temp * 60;
+		
+		longitudeDMS = degree + "°" + minute + "'" + second + "\"";
 	}
 
 	@Override
