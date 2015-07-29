@@ -84,25 +84,6 @@ public class SMSTest extends Activity implements LocationListener{
 				else{
 					locationTracker.showSettingsAlert();
 				}
-				
-				/*
-				NetworkInfo mWifi = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-				NetworkInfo mMobile = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
-				
-				if(mWifi.isConnected() || mMobile.isConnected()){
-					if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
-						locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, time, distance, SMSTest.this);
-						Log.i("LOG", "requestLocationUpdates(GPS Provider)");
-					}
-					if(locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)){
-						locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, time, distance, SMSTest.this);
-						Log.i("LOG", "requestLocationUpdates(NetworkProvider)");
-					}
-				}
-				else{
-					Toast.makeText(getBaseContext(), "Cannot determine location at this time", Toast.LENGTH_SHORT).show();
-				}
-				*/
 			}
 		});
 		
@@ -281,12 +262,6 @@ public class SMSTest extends Activity implements LocationListener{
 		byte minute;
 		float second;
 		float temp;
-
-		/*degree = (short) ((latitude >= 0) ? Math.floor(latitude) : Math.ceil(latitude));
-		temp = (float) ((latitude - degree) * 60);
-		minute = (byte) Math.floor(temp);
-		temp = (temp - minute) * 60;
-		second = Math.round(temp);*/
 
 		degree = (short) ((latitude >= 0) ? Math.floor(latitude) : Math.ceil(latitude));
 		temp = (float) (Math.abs(latitude) - Math.abs(degree)) * 60;
