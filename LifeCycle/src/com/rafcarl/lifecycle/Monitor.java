@@ -101,6 +101,8 @@ public class Monitor extends Activity implements SensorEventListener{
 			@Override
 			public void onFinish() {
 				timerDialog.dismiss();
+                //New Message object here
+                //Pass data 
 			} 
 		};
 		
