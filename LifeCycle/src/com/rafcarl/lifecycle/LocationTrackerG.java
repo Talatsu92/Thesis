@@ -1,5 +1,9 @@
 package com.rafcarl.lifecycle;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
+
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
@@ -12,6 +16,8 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -28,8 +34,9 @@ public class LocationTrackerG extends Activity
 	GoogleApiClient googleApiClient = null;
 	LocationRequest locationRequest = null;
 	
-	String latitude = null;
-	String longitude = null;
+//	String latitude = null;
+//	String longitude = null;
+	String address = null;
 
 	TextView textView = null;
 	
@@ -38,11 +45,16 @@ public class LocationTrackerG extends Activity
 	LayoutInflater inflater = null;
 	Context context = null;
 
-	public LocationTrackerG(Context context, TextView tv){
-		this.context = context;
-		textView = tv;
+//	public LocationTrackerG(Context context, TextView tv){
+	public LocationTrackerG(Context context, String addr){
 		
-		googleApiClient = new GoogleApiClient.Builder(this)
+//		textView = tv;
+
+		this.address = addr;
+		this.context = context;
+		
+		
+		googleApiClient = new GoogleApiClient.Builder(context)
 			.addConnectionCallbacks(this)
 			.addOnConnectionFailedListener(this)
 			.addApi(LocationServices.API)
@@ -52,13 +64,15 @@ public class LocationTrackerG extends Activity
 		locationRequest.setInterval(10000);
 		locationRequest.setFastestInterval(5000);
 		locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);	
+		
+		googleApiClient.connect();
 	}
 	
 	@Override
 	public void onConnected(Bundle arg0) {
 		// TODO Auto-generated method stub
 		LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
-		textView.setText("Location: Searching...");
+//		textView.setText("Location: Searching...");
 	}
 	
 	@Override
@@ -66,36 +80,56 @@ public class LocationTrackerG extends Activity
 		// TODO Auto-generated method stub
 		
 		if(location != null){
-			latitude = String.valueOf(location.getLatitude());
-			longitude = String.valueOf(location.getLongitude());
+			Geocoder geocoder = new Geocoder(this.context, Locale.getDefault());
+			List<Address> result = null;
+			Address single;
 			
-			L.m("Latitude: " + latitude + "\nLongitude: " + longitude);
+			try {
+				result = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+				single = result.get(0);
+				this.address = single.getAddressLine(0) + ", " + single.getAddressLine(1) + " " + single.getPostalCode() + ", " + single.getCountryName() + "\nLatitude: " +location.getLatitude() + "\nLongitude: " + location.getLongitude();
+				Toast.makeText(this.context, this.address, Toast.LENGTH_LONG).show();
+				L.m(this.address);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+			}
 			
-			textView.setText("Location: Found");
+//			latitude = String.valueOf(location.getLatitude());
+//			longitude = String.valueOf(location.getLongitude());
+//			
+//			L.m("Latitude: " + latitude + "\nLongitude: " + longitude);
+//			
+//			textView.setText("Location: Found");
 
 			LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this);
 			googleApiClient.disconnect();
 			
-			L.m("removeLocationUpdates() called, googleApiClient disconnected");			
+//			L.m("removeLocationUpdates() called, googleApiClient disconnected");			
 		}
+	}
+	
+	public String getAddress(){
+		return this.address;
 	}
 
 	@Override
 	public void onConnectionSuspended(int arg0) {
 		// TODO Auto-generated method stub
+		googleApiClient.disconnect();
 		Toast.makeText(context, "Connection suspended", Toast.LENGTH_LONG).show();
 	}
 	
 	@Override
 	public void onConnectionFailed(ConnectionResult arg0) {
 		// TODO Auto-generated method stub
+		googleApiClient.disconnect();
 		Toast.makeText(context, "Connection failed", Toast.LENGTH_LONG).show();
 	}
-
+	
 	@Override
 	public void run() {
 		// TODO Auto-generated method stub
-		googleApiClient.connect();
+		
 	}
 	
 }

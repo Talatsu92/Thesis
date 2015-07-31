@@ -45,6 +45,10 @@ public class Monitor extends Activity implements SensorEventListener{
 	
 	View view = null;
 	LayoutInflater inflater = null;
+	
+	String latitude;
+	String longitude;
+	String address;
 
 	public Monitor(Sensor a, Sensor g, SensorManager m, LocationManager lM, ConnectivityManager cM, Activity act, Context c) {		
 		Log.i(LOG, "constructor called");
@@ -79,20 +83,8 @@ public class Monitor extends Activity implements SensorEventListener{
 	}
 	
 	//Displays AlertDialog counting down from one minute
-	public void countDown(){
-		timerDialog = new AlertDialog.Builder(context).create();
-		timerDialog.setTitle("Sending message(s) in:");
-		timerDialog.setMessage("0:45");
-		timerDialog.setCanceledOnTouchOutside(false);
-		timerDialog.setButton(DialogInterface.BUTTON_NEUTRAL, "Cancel", new DialogInterface.OnClickListener() {
-
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				dialog.cancel();	
-			}
-		});
-
-		CountDownTimer timer = new CountDownTimer(5000, 1000){
+	public void countDown(String address){
+		final CountDownTimer timer = new CountDownTimer(45000, 1000){
 			@Override
 			public void onTick(long millisUntilFinished) {
 				if((millisUntilFinished/1000) == 45){
@@ -108,12 +100,25 @@ public class Monitor extends Activity implements SensorEventListener{
 
 			@Override
 			public void onFinish() {
-				
-				
 				timerDialog.dismiss();
 			} 
 		};
+		
+		timerDialog = new AlertDialog.Builder(context).create();
+		timerDialog.setTitle("Accident detected! Sending messages in:");
+		timerDialog.setMessage("00:45");
+		timerDialog.setCanceledOnTouchOutside(false);
+		timerDialog.setButton(DialogInterface.BUTTON_NEUTRAL, "Cancel", new DialogInterface.OnClickListener() {
 
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.cancel();	
+				timer.cancel();
+			}
+		});
+
+		
+		LocationTrackerG locationTracker = new LocationTrackerG(context, address);
 		timerDialog.show();
 		timer.start();
 	}
@@ -169,9 +174,9 @@ public class Monitor extends Activity implements SensorEventListener{
 
 						MainMenu.monitoring = false;
 
-						countDown(); 
+						countDown(this.address); 
 						
-						alertDialog.show();
+//						alertDialog.show();
 						
 //						AccidentDialog accidentDialog = new AccidentDialog();
 //						accidentDialog.show(activity.getFragmentManager(), "Accident Dialog");
