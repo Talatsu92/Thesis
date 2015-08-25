@@ -1,5 +1,7 @@
 package com.rafcarl.lifecycle;
 
+import java.util.List;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -84,7 +86,7 @@ public class Monitor extends Activity implements SensorEventListener{
 	
 	//Displays AlertDialog counting down from one minute
 	public void countDown(String address){
-		final CountDownTimer timer = new CountDownTimer(45000, 1000){
+		final CountDownTimer timer = new CountDownTimer(5000, 1000){
 			@Override
 			public void onTick(long millisUntilFinished) {
 				if((millisUntilFinished/1000) == 45){
@@ -100,7 +102,13 @@ public class Monitor extends Activity implements SensorEventListener{
 
 			@Override
 			public void onFinish() {
+				Message message = new Message();
+				message.getContacts();
+				List<Contact> contactList = message.getContactList();
 				timerDialog.dismiss();
+				
+				testDialog(contactList);
+				
                 //New Message object here
                 //Pass data 
 			} 
@@ -176,7 +184,7 @@ public class Monitor extends Activity implements SensorEventListener{
 
 						MainMenu.monitoring = false;
 
-						countDown(this.address); 
+						countDown(this.address);
 						
 //						alertDialog.show();
 						
@@ -272,6 +280,21 @@ public class Monitor extends Activity implements SensorEventListener{
 		return result;
 	}
 
+	public void testDialog(List<Contact> contactList){
+		AlertDialog.Builder builder = new AlertDialog.Builder(context);
+		builder.setTitle("Contact List");
+		builder.setMessage(contactList.toString());
+		builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.cancel();
+			}
+		});		
+
+		AlertDialog dialog = builder.create();
+		dialog.show();
+	}
 	
 
 }

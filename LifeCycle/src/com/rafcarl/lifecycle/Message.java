@@ -4,39 +4,35 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.database.Cursor;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
-import android.net.Uri;
 import android.telephony.SmsManager;
 import android.util.Log;
-import android.view.View;
-import android.widget.ProgressBar;
-import android.widget.TextView;
-import android.widget.Toast;
 
 public class Message extends Activity{
-	List<Contact> ContactList;
+	private List<Contact> contactList = null;
 	String LOG = "Message";
 	
-	LocationManager locationManager;
-	ConnectivityManager connectivityManager;
+	LocationManager locationManager = null;
+	ConnectivityManager connectivityManager = null;
 	
-	String streetAddress;
-	double latitude;
-	double longitude;
-	String latitudeDMS;
-	String longitudeDMS;
+	String streetAddress = "";
+	double latitude = 0;
+	double longitude = 0;
+	String latitudeDMS = "";
+	String longitudeDMS = "";
+		
+	public Message(){
+		setContactList(new ArrayList<Contact>());
+	}
 	
-
-	
-	public Message(LocationManager locationManager, ConnectivityManager connectivityManager) {
+	/*public Message(LocationManager locationManager, ConnectivityManager connectivityManager) {
 		ContactList = new ArrayList<Contact>();
 		
 		this.locationManager = locationManager;
 		this.connectivityManager = connectivityManager;
-	}
+	}*/
 	
 	//Location-related methods
 	public int getLocation(){
@@ -101,7 +97,7 @@ public class Message extends Activity{
 		String mapsLink = "http://maps.google.com/maps?saddr=" + latitudeDMS + "," + longitudeDMS;
 		String additional = "\n\n To view the location on Google Maps, follow this link:  " + mapsLink;
 				
-		for(Contact contact : ContactList) {
+		for(Contact contact : getContactList()) {
 			phoneNumber = contact.getNumber();
 			message = new StringBuilder(contact.getMessage());
 			message.append(additional);
@@ -111,23 +107,36 @@ public class Message extends Activity{
 	}
 	
 	public void getContacts(){
-		Cursor cursor;
-		DBHelper.db = DBHelper.dbHelper.getReadableDatabase();
-		cursor = DBHelper.db.rawQuery("SELECT * FROM LifeCycleTable", null);
+		Cursor cursor = null;
+		
+		try{
+			DBHelper.db = DBHelper.dbHelper.getReadableDatabase();
+			cursor = DBHelper.db.rawQuery("SELECT * FROM LifeCycleTable", null);
 
-		if(cursor.moveToFirst()){
-			while(!cursor.isAfterLast()){
-				Contact contact = new Contact();
-				contact.setName(cursor.getString(cursor.getColumnIndex(DBHelper.NAME)));
-				contact.setNumber(cursor.getString(cursor.getColumnIndex(DBHelper.NUMBER)));
-				contact.setMessage(cursor.getString(cursor.getColumnIndex(DBHelper.MESSAGE)));
-				contact.setId(cursor.getString(cursor.getColumnIndex(DBHelper.CONTACT_ID)));
-				
-				ContactList.add(contact);
+			if(cursor.moveToFirst()){
+				while(!cursor.isAfterLast()){
+					Contact contact = new Contact();
+					contact.setName(cursor.getString(cursor.getColumnIndex(DBHelper.NAME)));
+					contact.setNumber(cursor.getString(cursor.getColumnIndex(DBHelper.NUMBER)));
+					contact.setMessage(cursor.getString(cursor.getColumnIndex(DBHelper.MESSAGE)));
+					contact.setId(cursor.getString(cursor.getColumnIndex(DBHelper.CONTACT_ID)));
+					
+					contactList.add(contact);
 
-				cursor.moveToNext();
+					cursor.moveToNext();
+				}
 			}
+			cursor.close();
+		} catch(Exception e){
+			e.printStackTrace();
 		}
-		cursor.close();
+	}
+
+	public List<Contact> getContactList() {
+		return contactList;
+	}
+
+	public void setContactList(List<Contact> contactList) {
+		this.contactList = contactList;
 	}
 }
