@@ -33,6 +33,8 @@ public class LocationTrackerG extends Activity
 	
 	GoogleApiClient googleApiClient = null;
 	LocationRequest locationRequest = null;
+	private double latitude;
+	private double longitude;
 	
 //	String latitude = null;
 //	String longitude = null;
@@ -47,7 +49,6 @@ public class LocationTrackerG extends Activity
 
 //	public LocationTrackerG(Context context, TextView tv){
 	public LocationTrackerG(Context context, String addr){
-		
 //		textView = tv;
 
 		this.address = addr;
@@ -85,10 +86,11 @@ public class LocationTrackerG extends Activity
 			Address single;
 			
 			try {
+				setLatitude(location.getLatitude());
+				setLongitude(location.getLongitude());
 				result = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
 				single = result.get(0);
 				this.address = single.getAddressLine(0) + ", " + single.getAddressLine(1) + " " + single.getPostalCode() + ", " + single.getCountryName() + "\nLatitude: " +location.getLatitude() + "\nLongitude: " + location.getLongitude();
-				Toast.makeText(this.context, this.address, Toast.LENGTH_LONG).show();
 				L.m(this.address);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -130,6 +132,22 @@ public class LocationTrackerG extends Activity
 	public void run() {
 		// TODO Auto-generated method stub
 		
+	}
+
+	public double getLatitude() {
+		return latitude;
+	}
+
+	public void setLatitude(double latitude) {
+		this.latitude = latitude;
+	}
+
+	public double getLongitude() {
+		return longitude;
+	}
+
+	public void setLongitude(double longitude) {
+		this.longitude = longitude;
 	}
 	
 }

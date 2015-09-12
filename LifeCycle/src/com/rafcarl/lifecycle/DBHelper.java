@@ -22,7 +22,7 @@ public class DBHelper extends SQLiteOpenHelper {
 											+ "" + NUMBER + " VARCHAR(12), "
 											+ "" + MESSAGE + " VARCHAR(200), "
 											+ "" + CONTACT_ID + " INTEGER);";	
-	private static final String DROP_TABLE = "DROP TABLE IF EXISTS" + TABLE_NAME;
+	private static final String DROP_TABLE = "DROP TABLE IF EXISTS " + TABLE_NAME;
 	
 	private Context context;
 	public static DBHelper dbHelper;
@@ -49,8 +49,8 @@ public class DBHelper extends SQLiteOpenHelper {
 			db.execSQL(DROP_TABLE);
 			onCreate(db);
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			Toast.makeText(context, e.toString(), Toast.LENGTH_LONG).show();
 		}
 	}
+	
 }

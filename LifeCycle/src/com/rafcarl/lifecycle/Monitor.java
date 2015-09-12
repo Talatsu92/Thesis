@@ -81,12 +81,13 @@ public class Monitor extends Activity implements SensorEventListener{
 			});
 		
 		alertDialog = builder.create();
-		
 	}
 	
 	//Displays AlertDialog counting down from one minute
 	public void countDown(String address){
-		final CountDownTimer timer = new CountDownTimer(5000, 1000){
+		final LocationTrackerG locationTracker = new LocationTrackerG(context, address);
+		
+		final CountDownTimer timer = new CountDownTimer(30000, 1000){
 			@Override
 			public void onTick(long millisUntilFinished) {
 				if((millisUntilFinished/1000) == 45){
@@ -102,15 +103,11 @@ public class Monitor extends Activity implements SensorEventListener{
 
 			@Override
 			public void onFinish() {
-				Message message = new Message();
-				message.getContacts();
-				List<Contact> contactList = message.getContactList();
+				Message message = new Message(locationTracker.getLatitude(), locationTracker.getLongitude());
 				timerDialog.dismiss();
 				
-				testDialog(contactList);
-				
-                //New Message object here
-                //Pass data 
+                //send text message
+				message.sendMessage(context);
 			} 
 		};
 		
@@ -128,7 +125,6 @@ public class Monitor extends Activity implements SensorEventListener{
 		});
 
 		
-		LocationTrackerG locationTracker = new LocationTrackerG(context, address);
 		timerDialog.show();
 		timer.start();
 	}

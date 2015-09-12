@@ -4,14 +4,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.telephony.SmsManager;
 import android.util.Log;
+import android.widget.Toast;
 
-public class Message extends Activity{
-	private List<Contact> contactList = null;
+public class Message{
+	final private List<Contact> contactList = getContacts();
 	String LOG = "Message";
 	
 	LocationManager locationManager = null;
@@ -23,8 +29,9 @@ public class Message extends Activity{
 	String latitudeDMS = "";
 	String longitudeDMS = "";
 		
-	public Message(){
-		setContactList(new ArrayList<Contact>());
+	public Message(double lat, double lon){
+		latitude = lat;
+		longitude = lon;		
 	}
 	
 	/*public Message(LocationManager locationManager, ConnectivityManager connectivityManager) {
@@ -86,28 +93,85 @@ public class Message extends Activity{
 		Log.i(LOG, "LongitudeDMS: " + longitudeDMS);
 	}
 	
-	public void promptUser(AccidentDialog accidentDialog){
-		
-	}
-	
-	public void sendMessage(){
+	public void sendMessage(Context context){		
 		SmsManager sms = SmsManager.getDefault();
-		String phoneNumber;
-		StringBuilder message;
-		String mapsLink = "http://maps.google.com/maps?saddr=" + latitudeDMS + "," + longitudeDMS;
-		String additional = "\n\n To view the location on Google Maps, follow this link:  " + mapsLink;
+		
+		String sent = "SMS_SENT";
+		String delivered = "SMS_DELIVERED";
+		
+		PendingIntent sentPi = PendingIntent.getBroadcast(context, 0, new Intent(sent), 0);
+		PendingIntent deliveredPi = PendingIntent.getBroadcast(context, 0, new Intent(delivered), 0);
+		
+		Contact contact = null;
+		
+		String phoneNumber = "";
+		String mapsLink = "http://maps.google.com/maps?saddr=" + String.valueOf(latitude)+ "," + String.valueOf(longitude) + "";
+		String additional = "\nMy location: " + mapsLink;
+		
+		try {			
+			for(int i = 0; i < contactList.size(); i++) {
+				contact = contactList.get(i);
+				phoneNumber = contact.getNumber();
 				
-		for(Contact contact : getContactList()) {
-			phoneNumber = contact.getNumber();
-			message = new StringBuilder(contact.getMessage());
-			message.append(additional);
-			
-			sms.sendTextMessage(phoneNumber, null, message.toString(), null, null);
+				context.registerReceiver(new BroadcastReceiver(){
+
+					@Override
+					public void onReceive(Context context, Intent intent) {
+						switch(getResultCode()){
+							case Activity.RESULT_OK:
+			                    Toast.makeText(context, "SMS sent", Toast.LENGTH_SHORT).show();
+			                    break;
+			                case SmsManager.RESULT_ERROR_GENERIC_FAILURE:
+			                    Toast.makeText(context, "Generic failure",Toast.LENGTH_SHORT).show();
+			                    break;
+			                case SmsManager.RESULT_ERROR_NO_SERVICE:
+			                    Toast.makeText(context, "No service", Toast.LENGTH_SHORT).show();
+			                    break;
+			                case SmsManager.RESULT_ERROR_NULL_PDU:
+			                    Toast.makeText(context, "Null PDU", Toast.LENGTH_SHORT).show();
+			                    break;
+			                case SmsManager.RESULT_ERROR_RADIO_OFF:
+			                    Toast.makeText(context, "Radio off", Toast.LENGTH_SHORT).show();
+			                    break;
+						}
+					}
+				}, new IntentFilter(sent));
+				
+				context.registerReceiver(new BroadcastReceiver(){
+		            @Override
+		            public void onReceive(Context context, Intent intent) {
+		                switch (getResultCode())
+		                {
+		                    case Activity.RESULT_OK:
+		                        Toast.makeText(context, "SMS delivered", Toast.LENGTH_SHORT).show();
+		                        break;
+		                    case Activity.RESULT_CANCELED:
+		                        Toast.makeText(context, "SMS not delivered", Toast.LENGTH_SHORT).show();
+		                        break;                        
+		                }
+		            }
+		        }, new IntentFilter(delivered));
+				
+				sms.sendTextMessage(phoneNumber, null, contact.getMessage(), sentPi, deliveredPi);
+				Thread.sleep(250);
+				sms.sendTextMessage(phoneNumber, null, additional, sentPi, deliveredPi);
+				Thread.sleep(250);
+//				sms.sendMultipartTextMessage(phoneNumber, null, parts, sentPis, deliveredPis);
+			}
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} finally{
+			L.m("Message.sendMessage() complete");
 		}
+		
+		/*phoneNumber = contactList.get(0).getNumber();
+		sms.sendTextMessage(phoneNumber, null, contactList.get(0).getMessage(), null, null);*/
 	}
 	
-	public void getContacts(){
+	public List<Contact> getContacts(){
 		Cursor cursor = null;
+		
+		List<Contact> contactList = new ArrayList<Contact>();
 		
 		try{
 			DBHelper.db = DBHelper.dbHelper.getReadableDatabase();
@@ -130,13 +194,7 @@ public class Message extends Activity{
 		} catch(Exception e){
 			e.printStackTrace();
 		}
-	}
-
-	public List<Contact> getContactList() {
+		
 		return contactList;
-	}
-
-	public void setContactList(List<Contact> contactList) {
-		this.contactList = contactList;
 	}
 }

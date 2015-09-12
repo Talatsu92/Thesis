@@ -16,6 +16,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -28,7 +29,7 @@ public class ContactsMenu extends ListActivity {
 	public static final int PICK_CONTACT = 100;
 	public static final int UPDATE_EMERGENCY_CONTACT = 200;
 	public static final String LOG = "ContactsMenu";
-	public static final String preferenceFile = "com.rafcarl.lifecycle.pref";
+	public static final String preferenceFile = "com.rafcarl.lifecycle.prefs";
 	//	public static List<Contact> contacts = new ContactsData().getContacts();
 	public static ArrayAdapter<Contact> adapter;
 	public List<Contact> ContactList = new ArrayList<Contact>();
@@ -67,13 +68,14 @@ public class ContactsMenu extends ListActivity {
 		DBHelper.db = DBHelper.dbHelper.getReadableDatabase();
 		cursor = DBHelper.db.query(DBHelper.TABLE_NAME, null, null, null, null, null, null);
 		int count = cursor.getCount();
+		DBHelper.db.close();
 		msg.setText(String.valueOf(count));
 		msg.show();
 		cursor.close();
 	}
 
 	public void firstRun(){
-		DBHelper.db = DBHelper.dbHelper.getWritableDatabase();
+/*		DBHelper.db = DBHelper.dbHelper.getWritableDatabase();
 
 		for(int i = 1; i <= Flags.getMin(); i++){
 			//Set contact info
@@ -98,11 +100,27 @@ public class ContactsMenu extends ListActivity {
 		}
 		adapter.notifyDataSetChanged();
 
+		DBHelper.db.close();
+		
 		editor.putInt(Flags.EMERGENCY_CONTACTS, Flags.getMin());
-		editor.putInt(Flags.POS, Flags.getPos());
-		editor.putBoolean(Flags.FIRST_RUN, false);
-		editor.commit();
+		editor.putInt(Flags.POS, Flags.getPos());*/
+		
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle("First Run");
+		builder.setMessage("After selecting your emergency contacts from the phonebook, set each contact's phone number.");
+		builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
 
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				editor.putBoolean(Flags.FIRST_RUN, false);
+				editor.commit();
+				
+				dialog.cancel();
+			}
+		});		
+
+		AlertDialog dialog = builder.create();
+		dialog.show();
 	}
 
 	public void toggle(View v){
@@ -124,6 +142,7 @@ public class ContactsMenu extends ListActivity {
 			else{
 				requestCode = PICK_CONTACT;
 			}
+			
 			startActivityForResult(intent, requestCode);
 		}
 		else{
@@ -135,15 +154,17 @@ public class ContactsMenu extends ListActivity {
 	public void getContactsFromDatabase(List<Contact> list){
 		list.clear();
 
-		Cursor cursor;
+		Cursor cursor = null;
+		Contact contact = null;
 		DBHelper.db = DBHelper.dbHelper.getReadableDatabase();
+		
 		cursor = DBHelper.db.rawQuery("SELECT * FROM LifeCycleTable", null);
 
 		if(cursor.moveToFirst()){
 			while(!cursor.isAfterLast()){
-				Contact contact = new Contact();
+				contact = new Contact();
 				contact.setName(cursor.getString(cursor.getColumnIndex(DBHelper.NAME)));
-				contact.setNumber(cursor.getString(cursor.getColumnIndex(DBHelper.NUMBER)));
+				contact.setNumber(sanitize(cursor.getString(cursor.getColumnIndex(DBHelper.NUMBER))));
 				contact.setMessage(cursor.getString(cursor.getColumnIndex(DBHelper.MESSAGE)));
 				contact.setId(cursor.getString(cursor.getColumnIndex(DBHelper.CONTACT_ID)));
 				
@@ -152,13 +173,20 @@ public class ContactsMenu extends ListActivity {
 				cursor.moveToNext();
 			}
 		}
+		
+		DBHelper.db.close();
 		cursor.close();
+	}
+	
+	String sanitize(String number){
+		number.replaceAll(" ", "");
+		return number;
 	}
 
 	public int ifDuplicate(List<Contact> contactList, String name){
 		int result = 0;
 		String temp;
-
+		
 		for (Contact item : contactList) {
 			temp = item.getName();
 			if(name.equals(temp)){
@@ -206,7 +234,7 @@ public class ContactsMenu extends ListActivity {
 						if(requestCode == PICK_CONTACT){
 							// Adds the contact into the ListView & database
 							DBHelper.db.insert(DBHelper.TABLE_NAME, null, DBHelper.values);
-							ContactList.add(contact);		
+							ContactList.add(contact);	
 
 							//	Increment Contact count
 							int count = sharedPref.getInt(Flags.CONTACT_COUNT, 0);
@@ -214,28 +242,31 @@ public class ContactsMenu extends ListActivity {
 							editor.putInt(Flags.CONTACT_COUNT, count);
 							editor.commit();
 						}
-						else if(requestCode == UPDATE_EMERGENCY_CONTACT){ // Will overwrite initial "Emergency Contacts"
-							String pos = String.valueOf(sharedPref.getInt(Flags.POS, 0));
-
-							String selection = DBHelper.CONTACT_ID + "=?";
-							String[] selectionArgs = {pos};
-							DBHelper.db.update(DBHelper.TABLE_NAME, DBHelper.values, selection, selectionArgs);
-
-							int num = sharedPref.getInt(Flags.POS, 0);
-
-							ContactList.remove(num - 1);
-							ContactList.add(num - 1, contact);
-
-							//	Flags.pos++;
-							num++;
-							editor.putInt(Flags.POS, num);
-
-							//	Decrement "Emergency Contacts" count
-							num = sharedPref.getInt(Flags.EMERGENCY_CONTACTS, 0);
-							num--;
-							editor.putInt(Flags.EMERGENCY_CONTACTS, num);
-							editor.commit();
-						}
+//						else if(requestCode == UPDATE_EMERGENCY_CONTACT){ // Will overwrite initial "Emergency Contacts"
+//							String pos = String.valueOf(sharedPref.getInt(Flags.POS, 0));
+//
+//							String selection = DBHelper.CONTACT_ID + "=?";
+//							String[] selectionArgs = {pos};
+//							DBHelper.db.update(DBHelper.TABLE_NAME, DBHelper.values, selection, selectionArgs);
+//
+//							int num = sharedPref.getInt(Flags.POS, 0);
+//
+////							ContactList.remove(num - 1);
+////							ContactList.add(num - 1, contact);
+//							ContactList.set(num - 1, contact);
+//
+//							//	Flags.pos++;
+//							num++;
+//							editor.putInt(Flags.POS, num);
+//
+//							//	Decrement "Emergency Contacts" count
+//							num = sharedPref.getInt(Flags.EMERGENCY_CONTACTS, 0);
+//							num--;
+//							editor.putInt(Flags.EMERGENCY_CONTACTS, num);
+//							editor.commit();
+//						}
+						
+						DBHelper.db.close();
 						cursor.close();
 						adapter.notifyDataSetChanged();
 
@@ -249,7 +280,6 @@ public class ContactsMenu extends ListActivity {
 			}
 		}
 	}
-
 
 	public void displayContactDeleteDialog(Contact contact, int position){
 		final String id = contact.getId();
@@ -275,6 +305,8 @@ public class ContactsMenu extends ListActivity {
 
 				getContactsFromDatabase(ContactList);
 				adapter.notifyDataSetChanged();
+				
+				DBHelper.db.close();
 
 				msg.setText(name + " deleted");
 				msg.show();
@@ -308,6 +340,7 @@ public class ContactsMenu extends ListActivity {
 		else{
 			if(sharedPref.getInt(Flags.CONTACT_COUNT, 0) == 1){
 				msg.setText("Must have at least one contact");
+				msg.setDuration(Toast.LENGTH_LONG);
 				msg.show();
 			}
 			else{
@@ -316,6 +349,64 @@ public class ContactsMenu extends ListActivity {
 				deleteButton.toggle();
 				Flags.toggleDeleteState();
 			}
+		}
+	}
+
+	boolean isQualifiedNumber(String number){
+		Log.i("WHATEVER", "entered");
+		if(number.length() < 11){
+			return false;
+		}
+		for(int i = 0; i < number.length(); i++){
+			if(Character.isLetter(number.charAt(i))){
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	@Override
+	public void onBackPressed() {
+		List<String> check= new ArrayList<String>(0);
+		DBHelper.db = DBHelper.dbHelper.getReadableDatabase();
+		Cursor cursor = DBHelper.db.rawQuery("SELECT * FROM LifeCycleTable", null);
+		/*for(int i = 0; i < ContactList.size(); i++){
+			if(ContactList.get(i).getNumber().equals(R.string.select_a_number)){
+				check.add(ContactList.get(i).getName());
+			}
+		}*/
+		
+		if(cursor.moveToFirst()){
+			String number = "";
+			
+			while(!cursor.isAfterLast()){
+				number = cursor.getString(cursor.getColumnIndex(DBHelper.NUMBER));
+				if(!isQualifiedNumber(number)){
+					check.add(cursor.getString(cursor.getColumnIndex(DBHelper.NAME)));
+				}
+				
+				cursor.moveToNext();
+			}
+			
+			cursor.close();
+		}
+		
+		if(check.size() > 0){
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setTitle("Contact Menu");
+			builder.setMessage("Set the phone number for the following contacts: \n" + check.toString());
+			builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+
+				@Override
+				public void onClick(DialogInterface dialog, int which) {					
+					dialog.cancel();
+				}
+			});		
+
+			AlertDialog dialog = builder.create();
+			dialog.show();
+		} else{
+			super.onBackPressed();
 		}
 	}
 
@@ -348,6 +439,8 @@ public class ContactsMenu extends ListActivity {
 	protected void onStop() {
 		super.onStop();
 		
-		DBHelper.db.close();
+		if(DBHelper.db.isOpen()){
+			DBHelper.db.close();
+		}
 	}
 }

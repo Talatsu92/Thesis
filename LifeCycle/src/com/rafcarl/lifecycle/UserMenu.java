@@ -32,7 +32,7 @@ public class UserMenu extends Activity {
 	TextView conds;
 	TextView allergs;
 	
-	public static final String preferenceFile = "com.rafcarl.lifecycle.flags";
+	public static final String preferenceFile = "com.rafcarl.lifecycle.prefs";
 	public static final String Name = "nameKey"; 
 	public static final String Age = "ageKey"; 
 	public static final String Blood = "bloodKey"; 
@@ -139,7 +139,7 @@ public class UserMenu extends Activity {
 		editor.commit();
 		Toast.makeText(this, "Saved", Toast.LENGTH_LONG).show();
 
-		sharedPref = getSharedPreferences("com.rafcarl.lifecycle.flags", Context.MODE_PRIVATE);
+		sharedPref = getSharedPreferences(preferenceFile, Context.MODE_PRIVATE);
 		boolean bool = sharedPref.getBoolean(Flags.FIRST_RUN, true);
 		if(bool == true){
 			
