@@ -231,7 +231,7 @@ public class MainMenu extends Activity {
 				if(monitor == null){
 					Context context = getWindow().getContext();
 					
-					monitor = new Monitor(accelerometer, gyroscope, mSensorManager, locationManager, connectivityManager, MainMenu.this, context);
+					monitor = new Monitor(accelerometer, gyroscope, mSensorManager,MainMenu.this, context);
 				}
 				ImageButton startButton = (ImageButton) findViewById(R.id.StartButton);
 				TextView tv = (TextView) findViewById(R.id.StartText);

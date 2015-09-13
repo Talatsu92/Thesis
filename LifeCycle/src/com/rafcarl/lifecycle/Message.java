@@ -102,6 +102,10 @@ public class Message{
 		PendingIntent sentPi = PendingIntent.getBroadcast(context, 0, new Intent(sent), 0);
 		PendingIntent deliveredPi = PendingIntent.getBroadcast(context, 0, new Intent(delivered), 0);
 		
+		ArrayList<String> parts = new ArrayList<String>(2);
+		ArrayList<PendingIntent> sentPis = new ArrayList<PendingIntent>(2);
+		ArrayList<PendingIntent> deliveredPis = new ArrayList<PendingIntent>(2);
+		
 		Contact contact = null;
 		
 		String phoneNumber = "";
@@ -109,9 +113,25 @@ public class Message{
 		String additional = "\nMy location: " + mapsLink;
 		
 		try {			
-			for(int i = 0; i < contactList.size(); i++) {
+			int i;
+			
+			for(i = 0; i < 2; i++){
+				//PendingIntents for contact's message (part 1)
+				sentPis.add(sentPi);
+				deliveredPis.add(deliveredPi);
+				
+				//PendingIntents for location link (part 2)
+				sentPis.add(sentPi);
+				deliveredPis.add(deliveredPi);
+			}
+			
+			for(i = 0; i < contactList.size(); i++) {
 				contact = contactList.get(i);
 				phoneNumber = contact.getNumber();
+				
+				parts.clear();
+				parts.add(contact.getMessage());
+				parts.add(additional);
 				
 				context.registerReceiver(new BroadcastReceiver(){
 
@@ -151,21 +171,13 @@ public class Message{
 		                }
 		            }
 		        }, new IntentFilter(delivered));
-				
-				sms.sendTextMessage(phoneNumber, null, contact.getMessage(), sentPi, deliveredPi);
+
+				sms.sendMultipartTextMessage(phoneNumber, null, parts, sentPis, deliveredPis);
 				Thread.sleep(250);
-				sms.sendTextMessage(phoneNumber, null, additional, sentPi, deliveredPi);
-				Thread.sleep(250);
-//				sms.sendMultipartTextMessage(phoneNumber, null, parts, sentPis, deliveredPis);
 			}
 		} catch (InterruptedException e) {
 			e.printStackTrace();
-		} finally{
-			L.m("Message.sendMessage() complete");
 		}
-		
-		/*phoneNumber = contactList.get(0).getNumber();
-		sms.sendTextMessage(phoneNumber, null, contactList.get(0).getMessage(), null, null);*/
 	}
 	
 	public List<Contact> getContacts(){
