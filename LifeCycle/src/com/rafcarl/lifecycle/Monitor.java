@@ -14,6 +14,9 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.media.AudioManager;
+import android.media.AudioManager.OnAudioFocusChangeListener;
+import android.media.MediaPlayer;
 import android.os.CountDownTimer;
 import android.os.Environment;
 import android.util.Log;
@@ -21,16 +24,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class Monitor extends Activity implements SensorEventListener{
 	static final String LOG = "Monitor";
 	static final int SAMPLE_SIZE = 60;//(int) 1200000/SensorManager.SENSOR_DELAY_FASTEST;
 	
-	Activity activity;
-	Context context;
-	SensorManager mSensorManager;
-	Sensor accelerometer;
-	Sensor gyroscope;
+	Activity activity = null;
+	Context context = null;
+	SensorManager mSensorManager = null;
+	AudioManager am = null;
+	Sensor accelerometer = null;
+	Sensor gyroscope = null;
 
 	public static short accelCount;	
 	public static float accelValues[] = new float[SAMPLE_SIZE];
@@ -58,6 +63,7 @@ public class Monitor extends Activity implements SensorEventListener{
 		gyroscope = g;
 		activity = act;
 		context = c;
+		am = (AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
 		
 		inflater = LayoutInflater.from(context);
 		
@@ -139,7 +145,7 @@ public class Monitor extends Activity implements SensorEventListener{
 	
 							MainMenu.monitoring = false;
 							
-//							countDown(this.address);
+							countDown(this.address);
 						} else{
 							oneSecondMonitor = false;
 							impact = false;
@@ -169,6 +175,17 @@ public class Monitor extends Activity implements SensorEventListener{
 		public void countDown(String address){
 			final LocationTrackerG locationTracker = new LocationTrackerG(context, address);
 			
+			final MediaPlayer mediaPlayer = MediaPlayer.create(context, R.raw.alarm);
+			
+			int result = am.requestAudioFocus(new OnAudioFocusChangeListener() {
+				
+				@Override
+				public void onAudioFocusChange(int focusChange) {
+					// TODO Auto-generated method stub
+					
+				}
+			}, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT);
+			
 			final CountDownTimer timer = new CountDownTimer(30000, 1000){
 				@Override
 				public void onTick(long millisUntilFinished) {
@@ -185,11 +202,19 @@ public class Monitor extends Activity implements SensorEventListener{
 				
 				@Override
 				public void onFinish() {
-					Message message = new Message(locationTracker.getLatitude(), locationTracker.getLongitude());
-					timerDialog.dismiss();
-					
-					//send text message
-					message.sendMessage(context);
+					if(locationTracker.hasLocation()){
+						Message message = new Message(locationTracker.getLatitude(), locationTracker.getLongitude());
+						timerDialog.dismiss();
+						
+						//send text message
+						message.sendMessage(context);
+						
+						am.abandonAudioFocus(null);
+						mediaPlayer.stop();
+						mediaPlayer.release();
+					} else{
+						Toast.makeText(context, "Location not found", Toast.LENGTH_LONG).show();
+					}
 				} 
 			};
 			
@@ -202,12 +227,18 @@ public class Monitor extends Activity implements SensorEventListener{
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					dialog.cancel();	
+					am.abandonAudioFocus(null);
+					mediaPlayer.stop();
+					mediaPlayer.release();
 					timer.cancel();
 				}
 			});
 			
-			
 			timerDialog.show();
+			if(result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED){
+				mediaPlayer.start();
+			}
+			
 			timer.start();
 		}
 
