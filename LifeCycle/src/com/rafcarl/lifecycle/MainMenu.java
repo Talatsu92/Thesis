@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.location.LocationManager;
@@ -21,7 +22,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainMenu extends Activity {
-	public static final String preferenceFile = "com.rafcarl.lifecycle.flags";
+	public static final String preferenceFile = "com.rafcarl.lifecycle.prefs";
 	SharedPreferences sharedPref = null;
 	SharedPreferences.Editor editor = null;
 	public static final String LOG = "MainMenu";
@@ -58,8 +59,8 @@ public class MainMenu extends Activity {
 		gyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
 		
 		sharedPref = getSharedPreferences(preferenceFile, Context.MODE_PRIVATE);
+		
 		if(sharedPref.getBoolean(Flags.FIRST_RUN, true)){
-						
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setTitle("First Use");
 			builder.setMessage(R.string.redirectUser);
@@ -173,38 +174,45 @@ public class MainMenu extends Activity {
 	
 	//Prompts User to secure device within one minute
 	public void preMonitorDialog(View v){
+		DBHelper.dbHelper = new DBHelper(this);
+		DBHelper.db = DBHelper.dbHelper.getReadableDatabase();
+		Cursor cursor = DBHelper.db.rawQuery("SELECT * FROM LifeCycleTable", null);
+		
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle("Pre-Monitor");
-		builder.setMessage(R.string.preMonitor);
-		builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+		
+		if(cursor.moveToFirst() == false){
+			builder.setMessage("You have not set any emergency contacts.");
+			builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
 
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				dialog.cancel();
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					dialog.cancel();
+				}
+			});
+			
+		} else{
+			builder.setMessage(R.string.preMonitor);
+			builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
 
-				countDown();
-			}
-		});		
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					dialog.cancel();
+
+					countDown();
+				}
+			});
+		}
 
 		AlertDialog dialog = builder.create();
 		dialog.show();
 	}
 	
-	//Displays AlertDialog counting down from one minute
+	//Displays AlertDialog counting down from 45 seconds
 	public void countDown(){
 		final AlertDialog timerDialog = new AlertDialog.Builder(this).create();
-		timerDialog.setTitle("Secure the device");
-		timerDialog.setMessage("0:45");
-		timerDialog.setCanceledOnTouchOutside(false);
-		timerDialog.setButton(DialogInterface.BUTTON_NEUTRAL, "Cancel", new DialogInterface.OnClickListener() {
 
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				dialog.cancel();	
-			}
-		});
-
-		CountDownTimer timer = new CountDownTimer(5000, 1000){
+		final CountDownTimer timer = new CountDownTimer(5000, 1000){
 			@Override
 			public void onTick(long millisUntilFinished) {
 				if((millisUntilFinished/1000) == 45){
@@ -223,8 +231,7 @@ public class MainMenu extends Activity {
 				if(monitor == null){
 					Context context = getWindow().getContext();
 					
-					monitor = new Monitor(accelerometer, gyroscope, mSensorManager, locationManager, connectivityManager, MainMenu.this, context);
-					Log.i(LOG, "Monitor() called");
+					monitor = new Monitor(accelerometer, gyroscope, mSensorManager,MainMenu.this, context);
 				}
 				ImageButton startButton = (ImageButton) findViewById(R.id.StartButton);
 				TextView tv = (TextView) findViewById(R.id.StartText);
@@ -239,6 +246,18 @@ public class MainMenu extends Activity {
 			}
 			
 		};
+		
+		timerDialog.setTitle("Secure the device");
+		timerDialog.setMessage("0:45");
+		timerDialog.setCanceledOnTouchOutside(false);
+		timerDialog.setButton(DialogInterface.BUTTON_NEUTRAL, "Cancel", new DialogInterface.OnClickListener() {
+
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				timer.cancel();
+				dialog.cancel();	
+			}
+		});
 
 		timerDialog.show();
 		timer.start();

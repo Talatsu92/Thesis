@@ -1,17 +1,24 @@
 package com.rafcarl.lifecycle;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.location.LocationManager;
-import android.net.ConnectivityManager;
+import android.media.AudioManager;
+import android.media.AudioManager.OnAudioFocusChangeListener;
+import android.media.MediaPlayer;
 import android.os.CountDownTimer;
+import android.os.Environment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,14 +29,13 @@ import android.widget.Toast;
 public class Monitor extends Activity implements SensorEventListener{
 	static final String LOG = "Monitor";
 	static final int SAMPLE_SIZE = 60;//(int) 1200000/SensorManager.SENSOR_DELAY_FASTEST;
-
-	Activity activity;
-	Context context;
-	SensorManager mSensorManager;
-	LocationManager locationManager;
-	ConnectivityManager connectivityManager;
-	Sensor accelerometer;
-	Sensor gyroscope;
+	
+	Activity activity = null;
+	Context context = null;
+	SensorManager mSensorManager = null;
+	AudioManager am = null;
+	Sensor accelerometer = null;
+	Sensor gyroscope = null;
 
 	public static short accelCount;	
 	public static float accelValues[] = new float[SAMPLE_SIZE];
@@ -45,16 +51,19 @@ public class Monitor extends Activity implements SensorEventListener{
 	
 	View view = null;
 	LayoutInflater inflater = null;
+	
+	String latitude;
+	String longitude;
+	String address;
 
-	public Monitor(Sensor a, Sensor g, SensorManager m, LocationManager lM, ConnectivityManager cM, Activity act, Context c) {		
+	public Monitor(Sensor a, Sensor g, SensorManager m, Activity act, Context c) {		
 		Log.i(LOG, "constructor called");
 		mSensorManager = m;
 		accelerometer = a;
 		gyroscope = g;
-		locationManager = lM;
-		connectivityManager = cM;
 		activity = act;
 		context = c;
+		am = (AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
 		
 		inflater = LayoutInflater.from(context);
 		
@@ -75,47 +84,6 @@ public class Monitor extends Activity implements SensorEventListener{
 			});
 		
 		alertDialog = builder.create();
-		
-	}
-	
-	//Displays AlertDialog counting down from one minute
-	public void countDown(){
-		timerDialog = new AlertDialog.Builder(context).create();
-		timerDialog.setTitle("Sending message(s) in:");
-		timerDialog.setMessage("0:45");
-		timerDialog.setCanceledOnTouchOutside(false);
-		timerDialog.setButton(DialogInterface.BUTTON_NEUTRAL, "Cancel", new DialogInterface.OnClickListener() {
-
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				dialog.cancel();	
-			}
-		});
-
-		CountDownTimer timer = new CountDownTimer(5000, 1000){
-			@Override
-			public void onTick(long millisUntilFinished) {
-				if((millisUntilFinished/1000) == 45){
-					timerDialog.setMessage("00:45");
-				}
-				else if((millisUntilFinished/1000) < 10){
-					timerDialog.setMessage("00:0" + (millisUntilFinished/1000));
-				}
-				else{
-					timerDialog.setMessage("00:" + (millisUntilFinished/1000));
-				}
-			}
-
-			@Override
-			public void onFinish() {
-				
-				
-				timerDialog.dismiss();
-			} 
-		};
-
-		timerDialog.show();
-		timer.start();
 	}
 
 	public int obtainConfig(){
@@ -143,83 +111,136 @@ public class Monitor extends Activity implements SensorEventListener{
 		int type = event.sensor.getType();
 
 		switch (type) {
-		case Sensor.TYPE_ACCELEROMETER:
-			float sumVector = (float) Math.sqrt(Math.pow(event.values[0], 2) 
-					+ Math.pow(event.values[1], 2)  
-					+ Math.pow(event.values[2], 2))
-					/ SensorManager.GRAVITY_EARTH;
-			if(oneSecondMonitor == false && sumVector <= 0.6){
-				oneSecondMonitor = true;
-				mSensorManager.registerListener(this, gyroscope, SensorManager.SENSOR_DELAY_FASTEST);
-			}
-			else if(oneSecondMonitor == true){
-				if(accelCount < SAMPLE_SIZE){
-					accelValues[accelCount++] = sumVector;
+			case Sensor.TYPE_ACCELEROMETER:
+				float sumVector = (float) Math.sqrt(Math.pow(event.values[0], 2) 
+						+ Math.pow(event.values[1], 2)  
+						+ Math.pow(event.values[2], 2))
+						/ SensorManager.GRAVITY_EARTH;
+				
+				if(oneSecondMonitor == false && sumVector <= 0.6){
+					oneSecondMonitor = true;
+					mSensorManager.registerListener(this, gyroscope, SensorManager.SENSOR_DELAY_FASTEST);
+				} else if(oneSecondMonitor == true){
+					if(accelCount < SAMPLE_SIZE){
+						accelValues[accelCount++] = sumVector;
+					} else {
+						mSensorManager.unregisterListener(this);
+						impact = checkImpact();
+						if(impact == true && rotation == true){
+							Log.i(LOG, "Accident detected");
+
+							if(isExternalStorageWritable()){
+								//Formats the date and time 
+								SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+								String dateTime = dateFormat.format(Calendar.getInstance().getTime());
+								
+								writeToStorage("LifeCycle - " + dateTime);
+							}
+							
+							ImageButton startButton = (ImageButton) activity.findViewById(R.id.StartButton);
+							TextView tv = (TextView) activity.findViewById(R.id.StartText);
+	
+							startButton.setImageResource(R.drawable.play_icon);
+							tv.setText(R.string.start);
+	
+							MainMenu.monitoring = false;
+							
+							countDown(this.address);
+						} else{
+							oneSecondMonitor = false;
+							impact = false;
+							rotation = false;
+							accelCount = 0;
+							mSensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_FASTEST);
+						}
+					}
 				}
-				else {
-					mSensorManager.unregisterListener(this);
-					impact = checkImpact();
-					if(impact == true && rotation == true){
-						Log.i(LOG, "Accident detected");
-						ImageButton startButton = (ImageButton) activity.findViewById(R.id.StartButton);
-						TextView tv = (TextView) activity.findViewById(R.id.StartText);
-
-						startButton.setImageResource(R.drawable.play_icon);
-						tv.setText(R.string.start);
-
-						MainMenu.monitoring = false;
-
-						countDown(); 
-						
-						alertDialog.show();
-						
-//						AccidentDialog accidentDialog = new AccidentDialog();
-//						accidentDialog.show(activity.getFragmentManager(), "Accident Dialog");
+	
+				break;
+	
+			case Sensor.TYPE_GYROSCOPE:
+				if(Math.abs(event.values[0]) >= 4.0f || Math.abs(event.values[1]) >= 4.0f || Math.abs(event.values[2]) >= 4.0f){
+					rotation = true;
+					mSensorManager.unregisterListener(this, gyroscope);
+				}
+	
+				break;
+	
+			default:
+				break;
+		}
+	}
+	
+	//Displays AlertDialog counting down from one minute
+		public void countDown(String address){
+			final LocationTrackerG locationTracker = new LocationTrackerG(context, address);
 			
-//						Message message = new Message(locationManager, connectivityManager);
-//						Log.i(LOG, "instantiate new Message object");
-//						if(message.getLocation() == 1){
-//							Log.i(LOG, "message.getLocation()");
-//							TextView one = (TextView) findViewById(R.id.accident_locate);
-//							one.setText("Obtain user location " + "\u2713");
-//							message.convertToDMS();
-//							message.getContacts();
-//							message.promptUser(accidentDialog);
-//						}
-//						else{
-//							Toast.makeText(getApplicationContext(), "Unable to retrieve location", Toast.LENGTH_LONG).show();
-//						}
-						
-						//locate user
-						//prepare messages
-						//prompt user
-						//send messages
+			final MediaPlayer mediaPlayer = MediaPlayer.create(context, R.raw.alarm);
+			
+			int result = am.requestAudioFocus(new OnAudioFocusChangeListener() {
+				
+				@Override
+				public void onAudioFocusChange(int focusChange) {
+					// TODO Auto-generated method stub
+					
+				}
+			}, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT);
+			
+			final CountDownTimer timer = new CountDownTimer(30000, 1000){
+				@Override
+				public void onTick(long millisUntilFinished) {
+					if((millisUntilFinished/1000) == 45){
+						timerDialog.setMessage("00:45");
+					}
+					else if((millisUntilFinished/1000) < 10){
+						timerDialog.setMessage("00:0" + (millisUntilFinished/1000));
 					}
 					else{
-						oneSecondMonitor = false;
-						impact = false;
-						rotation = false;
-						accelCount = 0;
-						mSensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_FASTEST);
+						timerDialog.setMessage("00:" + (millisUntilFinished/1000));
 					}
 				}
+				
+				@Override
+				public void onFinish() {
+					if(locationTracker.hasLocation()){
+						Message message = new Message(locationTracker.getLatitude(), locationTracker.getLongitude());
+						timerDialog.dismiss();
+						
+						//send text message
+						message.sendMessage(context);
+						
+						am.abandonAudioFocus(null);
+						mediaPlayer.stop();
+						mediaPlayer.release();
+					} else{
+						Toast.makeText(context, "Location not found", Toast.LENGTH_LONG).show();
+					}
+				} 
+			};
+			
+			timerDialog = new AlertDialog.Builder(context).create();
+			timerDialog.setTitle("Accident detected! Sending messages in:");
+			timerDialog.setMessage("00:45");
+			timerDialog.setCanceledOnTouchOutside(false);
+			timerDialog.setButton(DialogInterface.BUTTON_NEUTRAL, "Cancel", new DialogInterface.OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					dialog.cancel();	
+					am.abandonAudioFocus(null);
+					mediaPlayer.stop();
+					mediaPlayer.release();
+					timer.cancel();
+				}
+			});
+			
+			timerDialog.show();
+			if(result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED){
+				mediaPlayer.start();
 			}
-
-			break;
-
-		case Sensor.TYPE_GYROSCOPE:
-			if(Math.abs(event.values[0]) >= 4.0f || Math.abs(event.values[1]) >= 4.0f || Math.abs(event.values[2]) >= 4.0f){
-				rotation = true;
-				mSensorManager.unregisterListener(this, gyroscope);
-			}
-
-			break;
-
-		default:
-			break;
+			
+			timer.start();
 		}
-
-	}
 
 	@Override
 	public void onAccuracyChanged(Sensor sensor, int accuracy) {
@@ -264,7 +285,33 @@ public class Monitor extends Activity implements SensorEventListener{
 
 		return result;
 	}
-
 	
-
+	public boolean isExternalStorageWritable() {
+	    String state = Environment.getExternalStorageState();
+	    if (Environment.MEDIA_MOUNTED.equals(state)) {
+	        return true;
+	    }
+	    return false;
+	}
+	
+	public void writeToStorage(String filename){
+		StringBuilder sb = new StringBuilder();
+		for(int i = 0; i < accelValues.length; i++){
+			sb.append((i + 1) + ", " + accelValues[i] + "\r\n");
+		}
+		
+		try {
+			File file = new File(Environment.getExternalStorageDirectory() + "/Documents", filename + ".csv");
+			file.createNewFile();
+			
+			FileOutputStream fos = new FileOutputStream(file);
+			fos.write(sb.toString().getBytes()); 
+			fos.close();
+			
+		} catch(NullPointerException e){
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 }

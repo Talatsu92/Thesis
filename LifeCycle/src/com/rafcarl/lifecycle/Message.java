@@ -4,39 +4,42 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
-import android.app.AlertDialog;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
-import android.net.Uri;
 import android.telephony.SmsManager;
 import android.util.Log;
-import android.view.View;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
-public class Message extends Activity{
-	List<Contact> ContactList;
+public class Message{
+	final private List<Contact> contactList = getContacts();
 	String LOG = "Message";
 	
-	LocationManager locationManager;
-	ConnectivityManager connectivityManager;
+	LocationManager locationManager = null;
+	ConnectivityManager connectivityManager = null;
 	
-	String streetAddress;
-	double latitude;
-	double longitude;
-	String latitudeDMS;
-	String longitudeDMS;
+	String streetAddress = "";
+	double latitude = 0;
+	double longitude = 0;
+	String latitudeDMS = "";
+	String longitudeDMS = "";
+		
+	public Message(double lat, double lon){
+		latitude = lat;
+		longitude = lon;		
+	}
 	
-
-	
-	public Message(LocationManager locationManager, ConnectivityManager connectivityManager) {
+	/*public Message(LocationManager locationManager, ConnectivityManager connectivityManager) {
 		ContactList = new ArrayList<Contact>();
 		
 		this.locationManager = locationManager;
 		this.connectivityManager = connectivityManager;
-	}
+	}*/
 	
 	//Location-related methods
 	public int getLocation(){
@@ -90,44 +93,120 @@ public class Message extends Activity{
 		Log.i(LOG, "LongitudeDMS: " + longitudeDMS);
 	}
 	
-	public void promptUser(AccidentDialog accidentDialog){
-		
-	}
-	
-	public void sendMessage(){
+	public void sendMessage(Context context){		
 		SmsManager sms = SmsManager.getDefault();
-		String phoneNumber;
-		StringBuilder message;
-		String mapsLink = "http://maps.google.com/maps?saddr=" + latitudeDMS + "," + longitudeDMS;
-		String additional = "\n\n To view the location on Google Maps, follow this link:  " + mapsLink;
-				
-		for(Contact contact : ContactList) {
-			phoneNumber = contact.getNumber();
-			message = new StringBuilder(contact.getMessage());
-			message.append(additional);
+		
+		String sent = "SMS_SENT";
+		String delivered = "SMS_DELIVERED";
+		
+		PendingIntent sentPi = PendingIntent.getBroadcast(context, 0, new Intent(sent), 0);
+		PendingIntent deliveredPi = PendingIntent.getBroadcast(context, 0, new Intent(delivered), 0);
+		
+		ArrayList<String> parts = new ArrayList<String>(2);
+		ArrayList<PendingIntent> sentPis = new ArrayList<PendingIntent>(2);
+		ArrayList<PendingIntent> deliveredPis = new ArrayList<PendingIntent>(2);
+		
+		Contact contact = null;
+		
+		String phoneNumber = "";
+		String mapsLink = "http://maps.google.com/maps?saddr=" + String.valueOf(latitude)+ "," + String.valueOf(longitude) + "";
+		String additional = "\nMy location: " + mapsLink;
+		
+		try {			
+			int i;
 			
-			sms.sendTextMessage(phoneNumber, null, message.toString(), null, null);
+			for(i = 0; i < 2; i++){
+				//PendingIntents for contact's message (part 1)
+				sentPis.add(sentPi);
+				deliveredPis.add(deliveredPi);
+				
+				//PendingIntents for location link (part 2)
+				sentPis.add(sentPi);
+				deliveredPis.add(deliveredPi);
+			}
+			
+			for(i = 0; i < contactList.size(); i++) {
+				contact = contactList.get(i);
+				phoneNumber = contact.getNumber();
+				
+				parts.clear();
+				parts.add(contact.getMessage());
+				parts.add(additional);
+				
+				context.registerReceiver(new BroadcastReceiver(){
+
+					@Override
+					public void onReceive(Context context, Intent intent) {
+						switch(getResultCode()){
+							case Activity.RESULT_OK:
+			                    Toast.makeText(context, "SMS sent", Toast.LENGTH_SHORT).show();
+			                    break;
+			                case SmsManager.RESULT_ERROR_GENERIC_FAILURE:
+			                    Toast.makeText(context, "Generic failure",Toast.LENGTH_SHORT).show();
+			                    break;
+			                case SmsManager.RESULT_ERROR_NO_SERVICE:
+			                    Toast.makeText(context, "No service", Toast.LENGTH_SHORT).show();
+			                    break;
+			                case SmsManager.RESULT_ERROR_NULL_PDU:
+			                    Toast.makeText(context, "Null PDU", Toast.LENGTH_SHORT).show();
+			                    break;
+			                case SmsManager.RESULT_ERROR_RADIO_OFF:
+			                    Toast.makeText(context, "Radio off", Toast.LENGTH_SHORT).show();
+			                    break;
+						}
+					}
+				}, new IntentFilter(sent));
+				
+				context.registerReceiver(new BroadcastReceiver(){
+		            @Override
+		            public void onReceive(Context context, Intent intent) {
+		                switch (getResultCode())
+		                {
+		                    case Activity.RESULT_OK:
+		                        Toast.makeText(context, "SMS delivered", Toast.LENGTH_SHORT).show();
+		                        break;
+		                    case Activity.RESULT_CANCELED:
+		                        Toast.makeText(context, "SMS not delivered", Toast.LENGTH_SHORT).show();
+		                        break;                        
+		                }
+		            }
+		        }, new IntentFilter(delivered));
+
+				sms.sendMultipartTextMessage(phoneNumber, null, parts, sentPis, deliveredPis);
+				Thread.sleep(250);
+			}
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
 	}
 	
-	public void getContacts(){
-		Cursor cursor;
-		DBHelper.db = DBHelper.dbHelper.getReadableDatabase();
-		cursor = DBHelper.db.rawQuery("SELECT * FROM LifeCycleTable", null);
+	public List<Contact> getContacts(){
+		Cursor cursor = null;
+		
+		List<Contact> contactList = new ArrayList<Contact>();
+		
+		try{
+			DBHelper.db = DBHelper.dbHelper.getReadableDatabase();
+			cursor = DBHelper.db.rawQuery("SELECT * FROM LifeCycleTable", null);
 
-		if(cursor.moveToFirst()){
-			while(!cursor.isAfterLast()){
-				Contact contact = new Contact();
-				contact.setName(cursor.getString(cursor.getColumnIndex(DBHelper.NAME)));
-				contact.setNumber(cursor.getString(cursor.getColumnIndex(DBHelper.NUMBER)));
-				contact.setMessage(cursor.getString(cursor.getColumnIndex(DBHelper.MESSAGE)));
-				contact.setId(cursor.getString(cursor.getColumnIndex(DBHelper.CONTACT_ID)));
-				
-				ContactList.add(contact);
+			if(cursor.moveToFirst()){
+				while(!cursor.isAfterLast()){
+					Contact contact = new Contact();
+					contact.setName(cursor.getString(cursor.getColumnIndex(DBHelper.NAME)));
+					contact.setNumber(cursor.getString(cursor.getColumnIndex(DBHelper.NUMBER)));
+					contact.setMessage(cursor.getString(cursor.getColumnIndex(DBHelper.MESSAGE)));
+					contact.setId(cursor.getString(cursor.getColumnIndex(DBHelper.CONTACT_ID)));
+					
+					contactList.add(contact);
 
-				cursor.moveToNext();
+					cursor.moveToNext();
+				}
 			}
+			cursor.close();
+		} catch(Exception e){
+			e.printStackTrace();
 		}
-		cursor.close();
+		
+		return contactList;
 	}
 }
