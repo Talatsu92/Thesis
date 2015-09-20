@@ -38,7 +38,6 @@ public class UserMenu extends Activity {
 	public static final String Blood = "bloodKey"; 
 	public static final String Anti = "antiKey";
 	public static final String Height = "heightKey"; 
-	public static final String HeightSpin = "heightspinKey"; 
 	public static final String Weight = "weightKey";
 	public static final String Meds = "medKey";
 	public static final String Conds = "condtKey";
@@ -54,7 +53,6 @@ public class UserMenu extends Activity {
 		blood = (Spinner) findViewById(R.id.user_blood_s);
 		anti = (Spinner) findViewById(R.id.user_blood_a);
 		height = (TextView) findViewById(R.id.user_height_i);
-		heightspin = (Spinner) findViewById(R.id.user_height_s);
 		weight = (TextView) findViewById(R.id.user_weight_i);
 		meds = (TextView) findViewById(R.id.user_multi1_i);
 		conds = (TextView) findViewById(R.id.user_multi2_i);
@@ -67,7 +65,6 @@ public class UserMenu extends Activity {
 		if(sharedPref.contains(Blood)){blood.setSelection(sharedPref.getInt(Blood, 0));}
 		if(sharedPref.contains(Anti)){anti.setSelection(sharedPref.getInt(Anti, 0));}
 		if(sharedPref.contains(Height)){height.setText(sharedPref.getString(Height, ""));}
-		if(sharedPref.contains(HeightSpin)){heightspin.setSelection(sharedPref.getInt(HeightSpin, 0));}
 		if(sharedPref.contains(Weight)){weight.setText(sharedPref.getString(Weight, ""));}
 		if(sharedPref.contains(Meds)){meds.setText(sharedPref.getString(Meds, ""));}
 		if(sharedPref.contains(Conds)){conds.setText(sharedPref.getString(Conds, ""));}
@@ -118,7 +115,6 @@ public class UserMenu extends Activity {
 		int b = blood.getSelectedItemPosition();
 		int an = anti.getSelectedItemPosition();
 		String h = height.getText().toString();
-		int hs = heightspin.getSelectedItemPosition();
 		String w = weight.getText().toString();
 		String m = meds.getText().toString();
 		String c = conds.getText().toString();
@@ -130,7 +126,6 @@ public class UserMenu extends Activity {
 		editor.putInt(Blood, b);
 		editor.putInt(Anti, an);
 		editor.putString(Height, h);
-		editor.putInt(HeightSpin, hs);
 		editor.putString(Weight, w);
 		editor.putString(Meds, m);
 		editor.putString(Conds, c);
@@ -139,7 +134,7 @@ public class UserMenu extends Activity {
 		editor.commit();
 		Toast.makeText(this, "Saved", Toast.LENGTH_LONG).show();
 
-		sharedPref = getSharedPreferences(preferenceFile, Context.MODE_PRIVATE);
+		sharedPref = getSharedPreferences("com.rafcarl.lifecycle.flags", Context.MODE_PRIVATE);
 		boolean bool = sharedPref.getBoolean(Flags.FIRST_RUN, true);
 		if(bool == true){
 			
