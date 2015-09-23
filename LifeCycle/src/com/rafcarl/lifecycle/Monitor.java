@@ -28,7 +28,7 @@ import android.widget.Toast;
 
 public class Monitor extends Activity implements SensorEventListener{
 	static final String LOG = "Monitor";
-	static final int SAMPLE_SIZE = 60;//(int) 1200000/SensorManager.SENSOR_DELAY_FASTEST;
+	static int SAMPLE_SIZE ;//(int) 1200000/SensorManager.SENSOR_DELAY_FASTEST;
 	
 	Activity activity = null;
 	Context context = null;
@@ -38,7 +38,7 @@ public class Monitor extends Activity implements SensorEventListener{
 	Sensor gyroscope = null;
 
 	public static short accelCount;	
-	public static float accelValues[] = new float[SAMPLE_SIZE];
+	public static float accelValues[] = null;
 
 	public static int config;	
 	public static boolean oneSecondMonitor;
@@ -65,6 +65,9 @@ public class Monitor extends Activity implements SensorEventListener{
 		context = c;
 		am = (AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
 		
+		SAMPLE_SIZE = (int)(1.5/(accelerometer.getMinDelay() * Math.pow(10, -6)));
+		accelValues = new float[SAMPLE_SIZE];
+		
 		inflater = LayoutInflater.from(context);
 		
 		view = inflater.inflate(R.layout.dialog_accident, null, false);
@@ -78,12 +81,13 @@ public class Monitor extends Activity implements SensorEventListener{
 				
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
-					// TODO Auto-generated method stub
 					dialog.dismiss();
 				}
 			});
 		
 		alertDialog = builder.create();
+		
+		L.m(String.valueOf(accelerometer.getMinDelay()));
 	}
 
 	public int obtainConfig(){
@@ -181,12 +185,11 @@ public class Monitor extends Activity implements SensorEventListener{
 				
 				@Override
 				public void onAudioFocusChange(int focusChange) {
-					// TODO Auto-generated method stub
-					
+					am.setStreamVolume(AudioManager.STREAM_MUSIC,am.getStreamMaxVolume(AudioManager.STREAM_MUSIC), 0);
 				}
 			}, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT);
 			
-			final CountDownTimer timer = new CountDownTimer(30000, 1000){
+			final CountDownTimer timer = new CountDownTimer(15000, 1000){
 				@Override
 				public void onTick(long millisUntilFinished) {
 					if((millisUntilFinished/1000) == 45){
@@ -231,6 +234,7 @@ public class Monitor extends Activity implements SensorEventListener{
 					mediaPlayer.stop();
 					mediaPlayer.release();
 					timer.cancel();
+					locationTracker.disconnect();
 				}
 			});
 			

@@ -6,12 +6,19 @@ import java.util.Locale;
 
 import org.apache.http.util.LangUtils;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
@@ -35,18 +42,19 @@ public class LocationTrackerG extends Activity
 	private double longitude = 0.0;
 	
 	String address = null;
-
 	TextView textView = null;
-	
 	View customLayout = null;
 	
 	LayoutInflater inflater = null;
 	Context context = null;
 
+	public LocationTrackerG(Context context){
+		this.context = context;
+	}
+	
 	public LocationTrackerG(Context context, String addr){
 		this.address = addr;
 		this.context = context;
-		
 		
 		googleApiClient = new GoogleApiClient.Builder(context)
 			.addConnectionCallbacks(this)
@@ -82,7 +90,7 @@ public class LocationTrackerG extends Activity
 				this.address = single.getAddressLine(0) + ", " + single.getAddressLine(1) + " " + single.getPostalCode() + ", " + single.getCountryName() + "\nLatitude: " +location.getLatitude() + "\nLongitude: " + location.getLongitude();
 				L.m(this.address);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 
 			LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this);
@@ -113,6 +121,19 @@ public class LocationTrackerG extends Activity
 	 
 	}
 
+	public boolean ifSettingsChecked(){
+		LocationManager lM = (LocationManager)context.getSystemService(Context.LOCATION_SERVICE);
+		
+		boolean isNetworkEnabled = lM.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+		boolean isGpsEnabled = lM.isProviderEnabled(LocationManager.GPS_PROVIDER);
+		
+		if(isNetworkEnabled == true && isGpsEnabled == true){
+			return true;
+		}
+		
+		return false;
+	}
+	
 	public boolean hasLocation(){
 		boolean result = false;
 		
@@ -130,5 +151,9 @@ public class LocationTrackerG extends Activity
 	public double getLongitude() {
 		return longitude;
 	}	
+	
+	public void disconnect(){
+		googleApiClient.disconnect();
+	}
 }
 							  

@@ -14,7 +14,9 @@ import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.provider.Settings;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -93,43 +95,7 @@ public class MainMenu extends Activity {
 			}
 		});
 				
-	}
-	
-//	public void testDialog(View v){
-//		final AlertDialog.Builder builder= new AlertDialog.Builder(this);
-//		builder.setTitle("Test Dialog")
-//			   .setMessage("First Message")
-//			   .setNegativeButton("Close", new DialogInterface.OnClickListener() {
-//				   
-//					@Override
-//					public void onClick(DialogInterface dialog, int which) {
-//						
-//					}
-//			   	})
-//				.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-//					
-//					@Override
-//					public void onClick(DialogInterface dialog, int which) {
-//						builder.setMessage("Second Message");			
-//					}
-//				});
-//		
-//		AlertDialog dialog = builder.create();
-//		
-//		dialog.show();
-//	}
-	
-//	@Override
-//	public void onDialogMessage(String message) {
-//		Toast.makeText(this, message,  Toast.LENGTH_SHORT).show();
-//	}
-	
-//	public void showDialog(View v){
-//		FragmentManager fm = getFragmentManager();
-//		Dialog d = new Dialog();
-//		d.show(fm, "Dialog");
-//	}
-	
+	}	
 
 	public void goToUser(View v){
 		Intent intent = new Intent(this, UserMenu.class);
@@ -181,6 +147,8 @@ public class MainMenu extends Activity {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle("Pre-Monitor");
 		
+		LocationTrackerG lg = new LocationTrackerG(this);
+		
 		if(cursor.moveToFirst() == false){
 			builder.setMessage("You have not set any emergency contacts.");
 			builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
@@ -191,6 +159,25 @@ public class MainMenu extends Activity {
 				}
 			});
 			
+		} else if(!lg.ifSettingsChecked()){
+			L.m("ifSettingsChecked() false"); 
+			
+			builder.setTitle("Set Location Sources");
+			builder.setMessage("This app requires the use of GPS and wireless networks enabled.");
+			builder.setPositiveButton("Settings", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int which) {
+					Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+					startActivity(intent);
+				}
+			});
+
+			builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int which) {
+					// TODO Auto-generated method stub
+					dialog.cancel();
+				}
+			});
+
 		} else{
 			builder.setMessage(R.string.preMonitor);
 			builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
@@ -229,10 +216,9 @@ public class MainMenu extends Activity {
 			@Override
 			public void onFinish() {
 				if(monitor == null){
-					Context context = getWindow().getContext();
-					
-					monitor = new Monitor(accelerometer, gyroscope, mSensorManager,MainMenu.this, context);
+					monitor = new Monitor(accelerometer, gyroscope, mSensorManager,MainMenu.this, getWindow().getContext());
 				}
+				
 				ImageButton startButton = (ImageButton) findViewById(R.id.StartButton);
 				TextView tv = (TextView) findViewById(R.id.StartText);
 				
@@ -244,7 +230,6 @@ public class MainMenu extends Activity {
 				
 				timerDialog.dismiss();
 			}
-			
 		};
 		
 		timerDialog.setTitle("Secure the device");
