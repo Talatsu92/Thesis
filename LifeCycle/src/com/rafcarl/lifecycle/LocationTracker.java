@@ -38,7 +38,6 @@ public class LocationTracker extends Activity implements LocationListener{
 		Log.i(LOG, "LocationTracker constructor enter");
 		this.locationManager = locationManager;
 		this.connectivityManager = connectivityManager;
-//		this.context = context;
 
 		this.gpsLocation = null;
 		this.networkLocation = null;

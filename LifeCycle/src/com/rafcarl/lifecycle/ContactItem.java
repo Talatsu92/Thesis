@@ -102,12 +102,36 @@ public class ContactItem extends Activity {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				EditText temp = (EditText) findViewById(R.id.editNumber);
-				temp.setText(contactNumbers[which]);
+				temp.setText(sanitize(contactNumbers[which]));
 			}
 		});
 
 		AlertDialog dialog = builder.create();
 		dialog.show();
+	}
+	
+	//Removes spaces and +63
+	String sanitize(String number){
+		int index;
+		StringBuilder sb = new StringBuilder(number);
+		
+		L.m(sb.toString());
+		
+		while((index = sb.indexOf(" ")) != -1){
+			sb.deleteCharAt(index);
+		}
+		
+		if(sb.substring(0, 3).equals("+63")){
+			sb.delete(0, 3);
+			sb.insert(0, "0");
+		}
+		
+		L.m(sb.toString());
+		
+//		number.replaceAll(" ", "");
+
+		
+		return sb.toString();
 	}
 	
 	// Updates contact information in the database

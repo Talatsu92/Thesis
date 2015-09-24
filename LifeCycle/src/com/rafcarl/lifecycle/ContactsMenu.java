@@ -164,7 +164,7 @@ public class ContactsMenu extends ListActivity {
 			while(!cursor.isAfterLast()){
 				contact = new Contact();
 				contact.setName(cursor.getString(cursor.getColumnIndex(DBHelper.NAME)));
-				contact.setNumber(sanitize(cursor.getString(cursor.getColumnIndex(DBHelper.NUMBER))));
+				contact.setNumber(cursor.getString(cursor.getColumnIndex(DBHelper.NUMBER)));
 				contact.setMessage(cursor.getString(cursor.getColumnIndex(DBHelper.MESSAGE)));
 				contact.setId(cursor.getString(cursor.getColumnIndex(DBHelper.CONTACT_ID)));
 				
@@ -176,11 +176,6 @@ public class ContactsMenu extends ListActivity {
 		
 		DBHelper.db.close();
 		cursor.close();
-	}
-	
-	String sanitize(String number){
-		number.replaceAll(" ", "");
-		return number;
 	}
 
 	public int ifDuplicate(List<Contact> contactList, String name){
@@ -345,15 +340,14 @@ public class ContactsMenu extends ListActivity {
 			}
 			else{
 				displayContactDeleteDialog(contact, position);
-				ToggleButton deleteButton = (ToggleButton) findViewById(R.id.deleteContact);
-				deleteButton.toggle();
-				Flags.toggleDeleteState();
+//				ToggleButton deleteButton = (ToggleButton) findViewById(R.id.deleteContact);
+//				deleteButton.toggle();
+//				Flags.toggleDeleteState();
 			}
 		}
 	}
 
 	boolean isQualifiedNumber(String number){
-		Log.i("WHATEVER", "entered");
 		if(number.length() < 11){
 			return false;
 		}

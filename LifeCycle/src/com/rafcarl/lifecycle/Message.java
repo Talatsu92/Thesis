@@ -109,7 +109,7 @@ public class Message{
 		Contact contact = null;
 		
 		String phoneNumber = "";
-		String mapsLink = "http://maps.google.com/maps?saddr=" + String.valueOf(latitude)+ "," + String.valueOf(longitude) + "";
+		String mapsLink = "http://maps.google.com/maps?daddr=" + String.valueOf(latitude)+ "," + String.valueOf(longitude) + "";
 		String additional = "\nMy location: " + mapsLink;
 		
 		try {			

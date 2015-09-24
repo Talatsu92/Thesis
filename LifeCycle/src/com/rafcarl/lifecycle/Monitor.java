@@ -41,7 +41,7 @@ public class Monitor extends Activity implements SensorEventListener{
 	public static float accelValues[] = null;
 
 	public static int config;	
-	public static boolean oneSecondMonitor;
+	public static boolean postMonitor;
 	public static boolean rotation;
 	public static boolean impact;
 	
@@ -55,6 +55,8 @@ public class Monitor extends Activity implements SensorEventListener{
 	String latitude;
 	String longitude;
 	String address;
+	
+	StringBuilder gyroSB = null;
 
 	public Monitor(Sensor a, Sensor g, SensorManager m, Activity act, Context c) {		
 		Log.i(LOG, "constructor called");
@@ -87,7 +89,7 @@ public class Monitor extends Activity implements SensorEventListener{
 		
 		alertDialog = builder.create();
 		
-		L.m(String.valueOf(accelerometer.getMinDelay()));
+		gyroSB = new StringBuilder("");
 	}
 
 	public int obtainConfig(){
@@ -121,10 +123,10 @@ public class Monitor extends Activity implements SensorEventListener{
 						+ Math.pow(event.values[2], 2))
 						/ SensorManager.GRAVITY_EARTH;
 				
-				if(oneSecondMonitor == false && sumVector <= 0.6){
-					oneSecondMonitor = true;
+				if(postMonitor == false && sumVector <= 0.6){
+					postMonitor = true;
 					mSensorManager.registerListener(this, gyroscope, SensorManager.SENSOR_DELAY_FASTEST);
-				} else if(oneSecondMonitor == true){
+				} else if(postMonitor == true){
 					if(accelCount < SAMPLE_SIZE){
 						accelValues[accelCount++] = sumVector;
 					} else {
@@ -151,7 +153,7 @@ public class Monitor extends Activity implements SensorEventListener{
 							
 							countDown(this.address);
 						} else{
-							oneSecondMonitor = false;
+							postMonitor = false;
 							impact = false;
 							rotation = false;
 							accelCount = 0;
@@ -163,6 +165,9 @@ public class Monitor extends Activity implements SensorEventListener{
 				break;
 	
 			case Sensor.TYPE_GYROSCOPE:
+				gyroSB.append("Gyro-x: " + event.values[0] + "\tGyro-y: " + event.values[1] + "\tGyro-z: " + event.values[2] + "\r\n");
+				
+				//4.0f
 				if(Math.abs(event.values[0]) >= 4.0f || Math.abs(event.values[1]) >= 4.0f || Math.abs(event.values[2]) >= 4.0f){
 					rotation = true;
 					mSensorManager.unregisterListener(this, gyroscope);
@@ -206,15 +211,14 @@ public class Monitor extends Activity implements SensorEventListener{
 				@Override
 				public void onFinish() {
 					if(locationTracker.hasLocation()){
-						Message message = new Message(locationTracker.getLatitude(), locationTracker.getLongitude());
-						timerDialog.dismiss();
-						
-						//send text message
-						message.sendMessage(context);
-						
 						am.abandonAudioFocus(null);
 						mediaPlayer.stop();
 						mediaPlayer.release();
+						
+						Message message = new Message(locationTracker.getLatitude(), locationTracker.getLongitude());
+						message.sendMessage(context);
+						
+						timerDialog.dismiss();
 					} else{
 						Toast.makeText(context, "Location not found", Toast.LENGTH_LONG).show();
 					}
@@ -229,12 +233,17 @@ public class Monitor extends Activity implements SensorEventListener{
 				
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
-					dialog.cancel();	
-					am.abandonAudioFocus(null);
-					mediaPlayer.stop();
-					mediaPlayer.release();
-					timer.cancel();
+					dialog.cancel();
 					locationTracker.disconnect();
+					am.abandonAudioFocus(null);
+					try{
+						mediaPlayer.stop();
+						mediaPlayer.release();
+					} catch(Exception e){
+						e.printStackTrace();
+					}
+
+					timer.cancel();
 				}
 			});
 			
@@ -253,7 +262,7 @@ public class Monitor extends Activity implements SensorEventListener{
 
 	public void startMonitoring(){
 		Log.i(LOG, "startMonitoring() enter");
-		oneSecondMonitor = false;
+		postMonitor = false;
 		rotation = false;
 		impact = false;
 		accelCount = 0;
@@ -305,11 +314,21 @@ public class Monitor extends Activity implements SensorEventListener{
 		}
 		
 		try {
-			File file = new File(Environment.getExternalStorageDirectory() + "/Documents", filename + ".csv");
-			file.createNewFile();
+			File directory = new File(Environment.getExternalStorageDirectory() + "/Documents/" + filename);
+			directory.mkdir();
 			
-			FileOutputStream fos = new FileOutputStream(file);
+			File accel_file = new File(Environment.getExternalStorageDirectory() + "/Documents/" + filename, "accelerometer.csv");
+			accel_file.createNewFile();
+			
+			File gyro_file = new File(Environment.getExternalStorageDirectory() + "/Documents/" + filename, "gyroscope.txt");
+			gyro_file.createNewFile();
+			
+			FileOutputStream fos = new FileOutputStream(accel_file);
 			fos.write(sb.toString().getBytes()); 
+			fos.close();
+			
+			fos = new FileOutputStream(gyro_file);
+			fos.write(gyroSB.toString().getBytes());
 			fos.close();
 			
 		} catch(NullPointerException e){
