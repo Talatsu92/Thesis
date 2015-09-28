@@ -67,7 +67,7 @@ public class Monitor extends Activity implements SensorEventListener{
 		context = c;
 		am = (AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
 		
-		SAMPLE_SIZE = (int)(1.5/(accelerometer.getMinDelay() * Math.pow(10, -6)));
+		SAMPLE_SIZE = (int)(1.2/(accelerometer.getMinDelay() * Math.pow(10, -6)));
 		accelValues = new float[SAMPLE_SIZE];
 		
 		inflater = LayoutInflater.from(context);
@@ -131,13 +131,13 @@ public class Monitor extends Activity implements SensorEventListener{
 						accelValues[accelCount++] = sumVector;
 					} else {
 						mSensorManager.unregisterListener(this);
-						impact = checkImpact();
+						impact = checkIfImpact();
 						if(impact == true && rotation == true){
 							Log.i(LOG, "Accident detected");
 
 							if(isExternalStorageWritable()){
 								//Formats the date and time 
-								SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+								SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH-mm-ss");
 								String dateTime = dateFormat.format(Calendar.getInstance().getTime());
 								
 								writeToStorage("LifeCycle - " + dateTime);
@@ -165,10 +165,10 @@ public class Monitor extends Activity implements SensorEventListener{
 				break;
 	
 			case Sensor.TYPE_GYROSCOPE:
-				gyroSB.append("Gyro-x: " + event.values[0] + "\tGyro-y: " + event.values[1] + "\tGyro-z: " + event.values[2] + "\r\n");
+				gyroSB.append("x: " + event.values[0] + "  y: " + event.values[1] + "  z: " + event.values[2] + "\r\n");
 				
 				//4.0f
-				if(Math.abs(event.values[0]) >= 4.0f || Math.abs(event.values[1]) >= 4.0f || Math.abs(event.values[2]) >= 4.0f){
+				if(Math.abs(event.values[0]) >= 6.28f || Math.abs(event.values[1]) >= 6.28f || Math.abs(event.values[2]) >= 6.28f){
 					rotation = true;
 					mSensorManager.unregisterListener(this, gyroscope);
 				}
@@ -194,7 +194,7 @@ public class Monitor extends Activity implements SensorEventListener{
 				}
 			}, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT);
 			
-			final CountDownTimer timer = new CountDownTimer(15000, 1000){
+			final CountDownTimer timer = new CountDownTimer(30000, 1000){
 				@Override
 				public void onTick(long millisUntilFinished) {
 					if((millisUntilFinished/1000) == 45){
@@ -215,7 +215,7 @@ public class Monitor extends Activity implements SensorEventListener{
 						mediaPlayer.stop();
 						mediaPlayer.release();
 						
-						Message message = new Message(locationTracker.getLatitude(), locationTracker.getLongitude());
+						Message message = new Message(locationTracker.getLatitude(), locationTracker.getLongitude(), context);
 						message.sendMessage(context);
 						
 						timerDialog.dismiss();
@@ -249,7 +249,8 @@ public class Monitor extends Activity implements SensorEventListener{
 			
 			timerDialog.show();
 			if(result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED){
-				mediaPlayer.start();
+				L.m("Audio start");
+//				mediaPlayer.start();
 			}
 			
 			timer.start();
@@ -278,7 +279,7 @@ public class Monitor extends Activity implements SensorEventListener{
 		mSensorManager.unregisterListener(this);
 	}
 
-	public boolean checkImpact(){
+	public boolean checkIfImpact(){
 		boolean result = false;
 		int i;
 		float min;
@@ -292,7 +293,7 @@ public class Monitor extends Activity implements SensorEventListener{
 				min = accelValues[i];
 			}
 		}
-		if((min <= 0.2f) && (max >= 2.2f )){
+		if((min <= 0.2f) && (max >= 2.8f )){
 			result = true;
 		}
 

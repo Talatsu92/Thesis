@@ -123,36 +123,40 @@ public class UserMenu extends Activity {
 		Editor editor = sharedPref.edit();
 		editor.putString(Name, n);
 		editor.putString(Age, a);
-		editor.putInt(Blood, b);
-		editor.putInt(Anti, an);
 		editor.putString(Height, h);
 		editor.putString(Weight, w);
 		editor.putString(Meds, m);
 		editor.putString(Conds, c);
 		editor.putString(Allergs, al);
+		editor.putInt(Blood, b);
+		editor.putInt(Anti, an);
 
-		editor.commit();
-		Toast.makeText(this, "Saved", Toast.LENGTH_LONG).show();
-
-		sharedPref = getSharedPreferences("com.rafcarl.lifecycle.flags", Context.MODE_PRIVATE);
-		boolean bool = sharedPref.getBoolean(Flags.FIRST_RUN, true);
-		if(bool == true){
-			
-			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setTitle("First Use");
-			builder.setMessage(R.string.redirectContacts);
-			builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
-
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					finish();
-					Intent intent = new Intent(getApplicationContext(), ContactsMenu.class);	
-					startActivity(intent);
-				}
-			});
-
-			AlertDialog dialog = builder.create();	
-			dialog.show();
+		if(b == 0 || an == 0){
+			Toast.makeText(this, "Blood Type is required!", Toast.LENGTH_LONG).show();
+		}
+		else{
+			editor.commit();
+			Toast.makeText(this, "Saved", Toast.LENGTH_LONG).show();
+		
+			sharedPref = getSharedPreferences("com.rafcarl.lifecycle.flags", Context.MODE_PRIVATE);
+			if(sharedPref.getBoolean(Flags.FIRST_RUN, true)){
+				
+				AlertDialog.Builder builder = new AlertDialog.Builder(this);
+				builder.setTitle("First Use");
+				builder.setMessage(R.string.redirectContacts);
+				builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+	
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						finish();
+						Intent intent = new Intent(getApplicationContext(), ContactsMenu.class);	
+						startActivity(intent);
+					}
+				});
+	
+				AlertDialog dialog = builder.create();	
+				dialog.show();
+			}
 		}
 
 	}

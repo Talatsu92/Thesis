@@ -340,9 +340,9 @@ public class ContactsMenu extends ListActivity {
 			}
 			else{
 				displayContactDeleteDialog(contact, position);
-//				ToggleButton deleteButton = (ToggleButton) findViewById(R.id.deleteContact);
-//				deleteButton.toggle();
-//				Flags.toggleDeleteState();
+				ToggleButton deleteButton = (ToggleButton) findViewById(R.id.deleteContact);
+				deleteButton.toggle();
+				Flags.toggleDeleteState();
 			}
 		}
 	}

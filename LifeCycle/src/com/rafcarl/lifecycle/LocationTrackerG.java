@@ -85,12 +85,13 @@ public class LocationTrackerG extends Activity
 				single = result.get(0);
 				this.address = single.getAddressLine(0) + ", " + single.getAddressLine(1) + " " + single.getPostalCode() + ", " + single.getCountryName();// + "\nLatitude: " +location.getLatitude() + "\nLongitude: " + location.getLongitude();
 				L.m(this.address);
-			} catch (IOException e) {
+				
+				LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this);
+			} catch (Exception e) {
 				e.printStackTrace();
+			} finally{
+				googleApiClient.disconnect();
 			}
-
-			LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this);
-			googleApiClient.disconnect();			
 		}
 	}
 	
@@ -114,7 +115,7 @@ public class LocationTrackerG extends Activity
 	public void run() {
 		
 	}
-
+	
 	public boolean ifSettingsChecked(){
 		LocationManager lM = (LocationManager)context.getSystemService(Context.LOCATION_SERVICE);
 		

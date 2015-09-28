@@ -155,7 +155,8 @@
             android:inputType="textMultiLine"
             android:maxLength="150"
             android:maxLines="3"
-            android:minLines="2" />
+            android:minLines="2"
+            android:text="None" />
 
         <TextView
             android:id="@+id/user_multi2"
@@ -173,7 +174,8 @@
             android:inputType="textMultiLine"
             android:maxLength="150"
             android:maxLines="3"
-            android:minLines="2" />
+            android:minLines="2"
+            android:text="None" />
 
         <TextView
             android:id="@+id/user_multi3"
@@ -191,7 +193,8 @@
             android:inputType="textMultiLine"
             android:maxLength="150"
             android:maxLines="3"
-            android:minLines="2" />
+            android:minLines="2"
+            android:text="None" />
 
         <LinearLayout
             android:id="@+id/ubuttons"

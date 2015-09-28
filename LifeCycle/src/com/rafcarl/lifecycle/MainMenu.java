@@ -234,6 +234,7 @@ public class MainMenu extends Activity {
 		
 		timerDialog.setTitle("Secure the device");
 		timerDialog.setMessage("0:45");
+		timerDialog.setCancelable(false);
 		timerDialog.setCanceledOnTouchOutside(false);
 		timerDialog.setButton(DialogInterface.BUTTON_NEUTRAL, "Cancel", new DialogInterface.OnClickListener() {
 
