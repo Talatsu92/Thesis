@@ -46,7 +46,6 @@ public class ContactsMenu extends ListActivity {
 		sharedPref = getSharedPreferences(preferenceFile, Context.MODE_PRIVATE);
 		editor = sharedPref.edit();
 
-
 		adapter = new ArrayAdapter<Contact>(
 				this, android.R.layout.simple_list_item_1, ContactList);
 		setListAdapter(adapter);
@@ -407,7 +406,7 @@ public class ContactsMenu extends ListActivity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.contacts_menu, menu);
+//		getMenuInflater().inflate(R.menu.contacts_menu, menu);
 
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 
