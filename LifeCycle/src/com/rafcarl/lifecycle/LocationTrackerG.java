@@ -1,6 +1,5 @@
 package com.rafcarl.lifecycle;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
@@ -69,7 +68,7 @@ public class LocationTrackerG extends Activity
 	}
 	
 	@Override
-	public void onLocationChanged(Location location) {
+	public void onLocationChanged(Location location){
 		L.m("onLocationChanged() entered");
 		if(location != null){
 			Geocoder geocoder = new Geocoder(this.context, Locale.getDefault());

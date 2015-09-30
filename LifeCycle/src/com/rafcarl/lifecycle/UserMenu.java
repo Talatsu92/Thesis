@@ -142,7 +142,7 @@ public class UserMenu extends Activity {
 			if(sharedPref.getBoolean(Flags.FIRST_RUN, true)){
 				
 				AlertDialog.Builder builder = new AlertDialog.Builder(this);
-				builder.setTitle("First Use");
+				builder.setTitle("First Run");
 				builder.setMessage(R.string.redirectContacts);
 				builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
 	
