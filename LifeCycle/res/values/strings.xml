@@ -30,12 +30,14 @@
         <item>cm</item>
     </string-array>
     <string-array name="blood_array">
+        <item></item>
         <item>O</item>
         <item>A</item>
         <item>B</item>
         <item>AB</item>
     </string-array>
     <string-array name="antigens">
+        <item></item>
         <item>+</item>
         <item>-</item>
     </string-array>
@@ -55,7 +57,7 @@
     <string name="delete_emergency_contact">Delete</string>
     <string name="title_dialog_preference">Contact Information</string>
     <string name="select_a_number">Select a number</string>
-    <string name="generic_message">Help! This is not a test. I\'ve been in a motorcycle accident. Contact me and emergency personnel as soon as possible. </string>
+    <string name="generic_message">Help! I\'ve been in a motorcycle accident. Contact me and emergency personnel as soon as possible.</string>
     <string name="generic_smartphone">For smartphone users, click here to view the location of the accident.</string>
     <string name="name">Name: </string>
     <string name="number">Number: </string>

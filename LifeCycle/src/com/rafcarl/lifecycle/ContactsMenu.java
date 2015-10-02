@@ -46,7 +46,6 @@ public class ContactsMenu extends ListActivity {
 		sharedPref = getSharedPreferences(preferenceFile, Context.MODE_PRIVATE);
 		editor = sharedPref.edit();
 
-
 		adapter = new ArrayAdapter<Contact>(
 				this, android.R.layout.simple_list_item_1, ContactList);
 		setListAdapter(adapter);
@@ -164,7 +163,7 @@ public class ContactsMenu extends ListActivity {
 			while(!cursor.isAfterLast()){
 				contact = new Contact();
 				contact.setName(cursor.getString(cursor.getColumnIndex(DBHelper.NAME)));
-				contact.setNumber(sanitize(cursor.getString(cursor.getColumnIndex(DBHelper.NUMBER))));
+				contact.setNumber(cursor.getString(cursor.getColumnIndex(DBHelper.NUMBER)));
 				contact.setMessage(cursor.getString(cursor.getColumnIndex(DBHelper.MESSAGE)));
 				contact.setId(cursor.getString(cursor.getColumnIndex(DBHelper.CONTACT_ID)));
 				
@@ -176,11 +175,6 @@ public class ContactsMenu extends ListActivity {
 		
 		DBHelper.db.close();
 		cursor.close();
-	}
-	
-	String sanitize(String number){
-		number.replaceAll(" ", "");
-		return number;
 	}
 
 	public int ifDuplicate(List<Contact> contactList, String name){
@@ -353,7 +347,6 @@ public class ContactsMenu extends ListActivity {
 	}
 
 	boolean isQualifiedNumber(String number){
-		Log.i("WHATEVER", "entered");
 		if(number.length() < 11){
 			return false;
 		}
@@ -413,7 +406,7 @@ public class ContactsMenu extends ListActivity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.contacts_menu, menu);
+//		getMenuInflater().inflate(R.menu.contacts_menu, menu);
 
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 

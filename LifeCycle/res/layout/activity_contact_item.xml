@@ -42,8 +42,8 @@
         android:layout_alignParentRight="true"
         android:layout_below="@id/editName"
         android:layout_toRightOf="@+id/textMessage"
-        android:ems="10"
         android:editable="false"
+        android:ems="10"
         android:inputType="none"
         android:onClick="selectNumber" >
 
@@ -68,7 +68,8 @@
         android:layout_below="@id/editNumber"
         android:layout_toRightOf="@id/textMessage"
         android:ems="10"
-        android:inputType="textMultiLine" />
+        android:inputType="textMultiLine"
+        android:maxLength="160" />
 
     <Button
         android:id="@+id/saveContact"
@@ -78,5 +79,14 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="16dp"
         android:text="@string/contact_submit" />
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/editMessage"
+        android:layout_centerHorizontal="true"
+        android:text="Max 160 characters"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
 
 </RelativeLayout>

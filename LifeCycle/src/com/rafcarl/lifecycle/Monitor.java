@@ -28,7 +28,7 @@ import android.widget.Toast;
 
 public class Monitor extends Activity implements SensorEventListener{
 	static final String LOG = "Monitor";
-	static final int SAMPLE_SIZE = 60;//(int) 1200000/SensorManager.SENSOR_DELAY_FASTEST;
+	static int SAMPLE_SIZE ;//(int) 1200000/SensorManager.SENSOR_DELAY_FASTEST;
 	
 	Activity activity = null;
 	Context context = null;
@@ -38,10 +38,10 @@ public class Monitor extends Activity implements SensorEventListener{
 	Sensor gyroscope = null;
 
 	public static short accelCount;	
-	public static float accelValues[] = new float[SAMPLE_SIZE];
+	public static float accelValues[] = null;
 
 	public static int config;	
-	public static boolean oneSecondMonitor;
+	public static boolean postMonitor;
 	public static boolean rotation;
 	public static boolean impact;
 	
@@ -55,6 +55,8 @@ public class Monitor extends Activity implements SensorEventListener{
 	String latitude;
 	String longitude;
 	String address;
+	
+	StringBuilder gyroSB = null;
 
 	public Monitor(Sensor a, Sensor g, SensorManager m, Activity act, Context c) {		
 		Log.i(LOG, "constructor called");
@@ -64,6 +66,9 @@ public class Monitor extends Activity implements SensorEventListener{
 		activity = act;
 		context = c;
 		am = (AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
+		
+		SAMPLE_SIZE = (int)(1.2/(accelerometer.getMinDelay() * Math.pow(10, -6)));
+		accelValues = new float[SAMPLE_SIZE];
 		
 		inflater = LayoutInflater.from(context);
 		
@@ -78,12 +83,13 @@ public class Monitor extends Activity implements SensorEventListener{
 				
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
-					// TODO Auto-generated method stub
 					dialog.dismiss();
 				}
 			});
 		
 		alertDialog = builder.create();
+		
+		gyroSB = new StringBuilder("");
 	}
 
 	public int obtainConfig(){
@@ -117,21 +123,21 @@ public class Monitor extends Activity implements SensorEventListener{
 						+ Math.pow(event.values[2], 2))
 						/ SensorManager.GRAVITY_EARTH;
 				
-				if(oneSecondMonitor == false && sumVector <= 0.6){
-					oneSecondMonitor = true;
+				if(postMonitor == false && sumVector <= 0.6){
+					postMonitor = true;
 					mSensorManager.registerListener(this, gyroscope, SensorManager.SENSOR_DELAY_FASTEST);
-				} else if(oneSecondMonitor == true){
+				} else if(postMonitor == true){
 					if(accelCount < SAMPLE_SIZE){
 						accelValues[accelCount++] = sumVector;
 					} else {
 						mSensorManager.unregisterListener(this);
-						impact = checkImpact();
+						impact = checkIfImpact();
 						if(impact == true && rotation == true){
 							Log.i(LOG, "Accident detected");
 
 							if(isExternalStorageWritable()){
 								//Formats the date and time 
-								SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+								SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH-mm-ss");
 								String dateTime = dateFormat.format(Calendar.getInstance().getTime());
 								
 								writeToStorage("LifeCycle - " + dateTime);
@@ -147,7 +153,7 @@ public class Monitor extends Activity implements SensorEventListener{
 							
 							countDown(this.address);
 						} else{
-							oneSecondMonitor = false;
+							postMonitor = false;
 							impact = false;
 							rotation = false;
 							accelCount = 0;
@@ -159,7 +165,10 @@ public class Monitor extends Activity implements SensorEventListener{
 				break;
 	
 			case Sensor.TYPE_GYROSCOPE:
-				if(Math.abs(event.values[0]) >= 4.0f || Math.abs(event.values[1]) >= 4.0f || Math.abs(event.values[2]) >= 4.0f){
+				gyroSB.append("x: " + event.values[0] + "  y: " + event.values[1] + "  z: " + event.values[2] + "\r\n");
+				
+				//4.0f
+				if(Math.abs(event.values[0]) >= 6.28f || Math.abs(event.values[1]) >= 6.28f || Math.abs(event.values[2]) >= 6.28f){
 					rotation = true;
 					mSensorManager.unregisterListener(this, gyroscope);
 				}
@@ -181,12 +190,11 @@ public class Monitor extends Activity implements SensorEventListener{
 				
 				@Override
 				public void onAudioFocusChange(int focusChange) {
-					// TODO Auto-generated method stub
-					
+					am.setStreamVolume(AudioManager.STREAM_MUSIC,am.getStreamMaxVolume(AudioManager.STREAM_MUSIC), 0);
 				}
 			}, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT);
 			
-			final CountDownTimer timer = new CountDownTimer(30000, 1000){
+			final CountDownTimer timer = new CountDownTimer(45000, 1000){
 				@Override
 				public void onTick(long millisUntilFinished) {
 					if((millisUntilFinished/1000) == 45){
@@ -203,17 +211,17 @@ public class Monitor extends Activity implements SensorEventListener{
 				@Override
 				public void onFinish() {
 					if(locationTracker.hasLocation()){
-						Message message = new Message(locationTracker.getLatitude(), locationTracker.getLongitude());
-						timerDialog.dismiss();
-						
-						//send text message
-						message.sendMessage(context);
-						
 						am.abandonAudioFocus(null);
 						mediaPlayer.stop();
 						mediaPlayer.release();
+						
+						Message message = new Message(locationTracker.getLatitude(), locationTracker.getLongitude(), context);
+						message.sendMessage(context);
+						
+						timerDialog.dismiss();
 					} else{
 						Toast.makeText(context, "Location not found", Toast.LENGTH_LONG).show();
+						timerDialog.dismiss();
 					}
 				} 
 			};
@@ -226,17 +234,24 @@ public class Monitor extends Activity implements SensorEventListener{
 				
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
-					dialog.cancel();	
+					dialog.cancel();
+					locationTracker.disconnect();
 					am.abandonAudioFocus(null);
-					mediaPlayer.stop();
-					mediaPlayer.release();
+					try{
+						mediaPlayer.stop();
+						mediaPlayer.release();
+					} catch(Exception e){
+						e.printStackTrace();
+					}
+
 					timer.cancel();
 				}
 			});
 			
 			timerDialog.show();
 			if(result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED){
-				mediaPlayer.start();
+				L.m("Audio start");
+//				mediaPlayer.start();
 			}
 			
 			timer.start();
@@ -249,7 +264,7 @@ public class Monitor extends Activity implements SensorEventListener{
 
 	public void startMonitoring(){
 		Log.i(LOG, "startMonitoring() enter");
-		oneSecondMonitor = false;
+		postMonitor = false;
 		rotation = false;
 		impact = false;
 		accelCount = 0;
@@ -265,7 +280,7 @@ public class Monitor extends Activity implements SensorEventListener{
 		mSensorManager.unregisterListener(this);
 	}
 
-	public boolean checkImpact(){
+	public boolean checkIfImpact(){
 		boolean result = false;
 		int i;
 		float min;
@@ -279,7 +294,7 @@ public class Monitor extends Activity implements SensorEventListener{
 				min = accelValues[i];
 			}
 		}
-		if((min <= 0.2f) && (max >= 2.2f )){
+		if((min <= 0.2f) && (max >= 2.8f )){
 			result = true;
 		}
 
@@ -301,11 +316,21 @@ public class Monitor extends Activity implements SensorEventListener{
 		}
 		
 		try {
-			File file = new File(Environment.getExternalStorageDirectory() + "/Documents", filename + ".csv");
-			file.createNewFile();
+			File directory = new File(Environment.getExternalStorageDirectory() + "/Documents/" + filename);
+			directory.mkdir();
 			
-			FileOutputStream fos = new FileOutputStream(file);
+			File accel_file = new File(Environment.getExternalStorageDirectory() + "/Documents/" + filename, "accelerometer.csv");
+			accel_file.createNewFile();
+			
+			File gyro_file = new File(Environment.getExternalStorageDirectory() + "/Documents/" + filename, "gyroscope.txt");
+			gyro_file.createNewFile();
+			
+			FileOutputStream fos = new FileOutputStream(accel_file);
 			fos.write(sb.toString().getBytes()); 
+			fos.close();
+			
+			fos = new FileOutputStream(gyro_file);
+			fos.write(gyroSB.toString().getBytes());
 			fos.close();
 			
 		} catch(NullPointerException e){

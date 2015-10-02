@@ -38,7 +38,6 @@ public class UserMenu extends Activity {
 	public static final String Blood = "bloodKey"; 
 	public static final String Anti = "antiKey";
 	public static final String Height = "heightKey"; 
-	public static final String HeightSpin = "heightspinKey"; 
 	public static final String Weight = "weightKey";
 	public static final String Meds = "medKey";
 	public static final String Conds = "condtKey";
@@ -54,7 +53,6 @@ public class UserMenu extends Activity {
 		blood = (Spinner) findViewById(R.id.user_blood_s);
 		anti = (Spinner) findViewById(R.id.user_blood_a);
 		height = (TextView) findViewById(R.id.user_height_i);
-		heightspin = (Spinner) findViewById(R.id.user_height_s);
 		weight = (TextView) findViewById(R.id.user_weight_i);
 		meds = (TextView) findViewById(R.id.user_multi1_i);
 		conds = (TextView) findViewById(R.id.user_multi2_i);
@@ -67,7 +65,6 @@ public class UserMenu extends Activity {
 		if(sharedPref.contains(Blood)){blood.setSelection(sharedPref.getInt(Blood, 0));}
 		if(sharedPref.contains(Anti)){anti.setSelection(sharedPref.getInt(Anti, 0));}
 		if(sharedPref.contains(Height)){height.setText(sharedPref.getString(Height, ""));}
-		if(sharedPref.contains(HeightSpin)){heightspin.setSelection(sharedPref.getInt(HeightSpin, 0));}
 		if(sharedPref.contains(Weight)){weight.setText(sharedPref.getString(Weight, ""));}
 		if(sharedPref.contains(Meds)){meds.setText(sharedPref.getString(Meds, ""));}
 		if(sharedPref.contains(Conds)){conds.setText(sharedPref.getString(Conds, ""));}
@@ -77,7 +74,7 @@ public class UserMenu extends Activity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.user_menu, menu);
+//		getMenuInflater().inflate(R.menu.user_menu, menu);
 
 		getActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -118,7 +115,6 @@ public class UserMenu extends Activity {
 		int b = blood.getSelectedItemPosition();
 		int an = anti.getSelectedItemPosition();
 		String h = height.getText().toString();
-		int hs = heightspin.getSelectedItemPosition();
 		String w = weight.getText().toString();
 		String m = meds.getText().toString();
 		String c = conds.getText().toString();
@@ -127,37 +123,40 @@ public class UserMenu extends Activity {
 		Editor editor = sharedPref.edit();
 		editor.putString(Name, n);
 		editor.putString(Age, a);
-		editor.putInt(Blood, b);
-		editor.putInt(Anti, an);
 		editor.putString(Height, h);
-		editor.putInt(HeightSpin, hs);
 		editor.putString(Weight, w);
 		editor.putString(Meds, m);
 		editor.putString(Conds, c);
 		editor.putString(Allergs, al);
+		editor.putInt(Blood, b);
+		editor.putInt(Anti, an);
 
-		editor.commit();
-		Toast.makeText(this, "Saved", Toast.LENGTH_LONG).show();
-
-		sharedPref = getSharedPreferences(preferenceFile, Context.MODE_PRIVATE);
-		boolean bool = sharedPref.getBoolean(Flags.FIRST_RUN, true);
-		if(bool == true){
-			
-			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			builder.setTitle("First Use");
-			builder.setMessage(R.string.redirectContacts);
-			builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
-
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					finish();
-					Intent intent = new Intent(getApplicationContext(), ContactsMenu.class);	
-					startActivity(intent);
-				}
-			});
-
-			AlertDialog dialog = builder.create();	
-			dialog.show();
+		if(b == 0 || an == 0){
+			Toast.makeText(this, "Blood Type is required!", Toast.LENGTH_LONG).show();
+		}
+		else{
+			editor.commit();
+			Toast.makeText(this, "Saved", Toast.LENGTH_LONG).show();
+		
+			sharedPref = getSharedPreferences("com.rafcarl.lifecycle.flags", Context.MODE_PRIVATE);
+			if(sharedPref.getBoolean(Flags.FIRST_RUN, true)){
+				
+				AlertDialog.Builder builder = new AlertDialog.Builder(this);
+				builder.setTitle("First Run");
+				builder.setMessage(R.string.redirectContacts);
+				builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+	
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						finish();
+						Intent intent = new Intent(getApplicationContext(), ContactsMenu.class);	
+						startActivity(intent);
+					}
+				});
+	
+				AlertDialog dialog = builder.create();	
+				dialog.show();
+			}
 		}
 
 	}
