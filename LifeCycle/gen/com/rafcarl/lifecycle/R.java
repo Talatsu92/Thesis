@@ -503,7 +503,7 @@ containing a value of this type.
         public static final int accelInfo=0x7f080031;
         public static final int accelStart=0x7f080034;
         public static final int accelValues=0x7f080030;
-        public static final int action_settings=0x7f080062;
+        public static final int action_settings=0x7f080063;
         public static final int addContact=0x7f080022;
         public static final int addDeleteButtons=0x7f080021;
         public static final int addressi=0x7f080041;
@@ -518,9 +518,9 @@ containing a value of this type.
         public static final int buy_with_google=0x7f080010;
         public static final int classic=0x7f080014;
         public static final int deleteContact=0x7f080023;
-        public static final int dialog=0x7f08005c;
-        public static final int dialogAccidentLocation=0x7f08005f;
-        public static final int dialogAccidentMessages=0x7f080060;
+        public static final int dialog=0x7f08005d;
+        public static final int dialogAccidentLocation=0x7f080060;
+        public static final int dialogAccidentMessages=0x7f080061;
         public static final int donate_with_google=0x7f080013;
         public static final int editMessage=0x7f08001d;
         public static final int editName=0x7f080019;
@@ -540,7 +540,7 @@ containing a value of this type.
         public static final int match_parent=0x7f08000e;
         public static final int monochrome=0x7f080016;
         public static final int msgEnt=0x7f080038;
-        public static final int no=0x7f08005d;
+        public static final int no=0x7f08005e;
         public static final int none=0x7f080000;
         public static final int normal=0x7f080003;
         public static final int numEnt=0x7f080037;
@@ -555,7 +555,7 @@ containing a value of this type.
         public static final int smsBtn=0x7f080039;
         public static final int strict_sandbox=0x7f08000b;
         public static final int terrain=0x7f080005;
-        public static final int testButton=0x7f080061;
+        public static final int testButton=0x7f080062;
         public static final int textMessage=0x7f08001c;
         public static final int textName=0x7f080018;
         public static final int textNumber=0x7f08001b;
@@ -575,6 +575,7 @@ containing a value of this type.
         public static final int user_clear=0x7f08005b;
         public static final int user_height=0x7f08004e;
         public static final int user_height_i=0x7f08004f;
+        public static final int user_height_s=0x7f08005c;
         public static final int user_multi1=0x7f080053;
         public static final int user_multi1_i=0x7f080054;
         public static final int user_multi2=0x7f080055;
@@ -588,7 +589,7 @@ containing a value of this type.
         public static final int user_weight_i=0x7f080052;
         public static final int uweight=0x7f080050;
         public static final int wrap_content=0x7f08000f;
-        public static final int yes=0x7f08005e;
+        public static final int yes=0x7f08005f;
     }
     public static final class integer {
         public static final int google_play_services_version=0x7f0a0000;
@@ -602,9 +603,10 @@ containing a value of this type.
         public static final int activity_sms_test=0x7f030005;
         public static final int activity_test=0x7f030006;
         public static final int activity_user_menu=0x7f030007;
-        public static final int dialog=0x7f030008;
-        public static final int dialog_accident=0x7f030009;
-        public static final int test=0x7f03000a;
+        public static final int activity_user_menu_orig=0x7f030008;
+        public static final int dialog=0x7f030009;
+        public static final int dialog_accident=0x7f03000a;
+        public static final int test=0x7f03000b;
     }
     public static final class menu {
         public static final int accel_test=0x7f0d0000;

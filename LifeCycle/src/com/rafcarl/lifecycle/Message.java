@@ -124,16 +124,16 @@ public class Message{
 		}
 		StringBuilder con = new StringBuilder();
 		if(sharedPref.contains(Conds)){
-			con.append("Conditions:\n");
+			con.append("Conditions: ");
 			con.append(sharedPref.getString(Conds, ""));
 		}
 		StringBuilder info = new StringBuilder();
 		if(sharedPref.contains(Meds)){
-			info.append("Medications:\n");
+			info.append("Medications: ");
 			info.append(sharedPref.getString(Meds, "") + "\n");
 		}
 		if(sharedPref.contains(Allergs)){
-			info.append("Allergies:\n");
+			info.append("Allergies: ");
 			info.append(sharedPref.getString(Allergs, ""));
 		}
 		
@@ -145,9 +145,9 @@ public class Message{
 		PendingIntent sentPi = PendingIntent.getBroadcast(context, 0, new Intent(sent), 0);
 		PendingIntent deliveredPi = PendingIntent.getBroadcast(context, 0, new Intent(delivered), 0);
 		
-//		ArrayList<String> parts = new ArrayList<String>(2);
-//		ArrayList<PendingIntent> sentPis = new ArrayList<PendingIntent>(2);
-//		ArrayList<PendingIntent> deliveredPis = new ArrayList<PendingIntent>(2);
+//		ArrayList<String> parts = new ArrayList<String>();
+//		ArrayList<PendingIntent> sentPis = new ArrayList<PendingIntent>();
+//		ArrayList<PendingIntent> deliveredPis = new ArrayList<PendingIntent>();
 		
 		Contact contact = null;
 		

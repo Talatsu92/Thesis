@@ -194,11 +194,11 @@ public class Monitor extends Activity implements SensorEventListener{
 				}
 			}, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT);
 			
-			final CountDownTimer timer = new CountDownTimer(45000, 1000){
+			final CountDownTimer timer = new CountDownTimer(30000, 1000){
 				@Override
 				public void onTick(long millisUntilFinished) {
-					if((millisUntilFinished/1000) == 45){
-						timerDialog.setMessage("00:45");
+					if((millisUntilFinished/1000) == 30){
+						timerDialog.setMessage("00:30");
 					}
 					else if((millisUntilFinished/1000) < 10){
 						timerDialog.setMessage("00:0" + (millisUntilFinished/1000));

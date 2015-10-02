@@ -58,7 +58,7 @@ public class LocationTrackerG extends Activity
 		locationRequest.setFastestInterval(5000);
 		locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);	
 		
-		googleApiClient.connect(); 
+		googleApiClient.connect();
 	}
 	
 	@Override
@@ -79,11 +79,11 @@ public class LocationTrackerG extends Activity
 				latitude = location.getLatitude();
 				longitude = location.getLongitude();
 				
-				result = geocoder.getFromLocation(latitude, longitude, 1);
-				
-				single = result.get(0);
-				this.address = single.getAddressLine(0) + ", " + single.getAddressLine(1) + " " + single.getPostalCode() + ", " + single.getCountryName();// + "\nLatitude: " +location.getLatitude() + "\nLongitude: " + location.getLongitude();
-				L.m(this.address);
+//				result = geocoder.getFromLocation(latitude, longitude, 1);
+//				
+//				single = result.get(0);
+//				this.address = single.getAddressLine(0) + ", " + single.getAddressLine(1) + " " + single.getPostalCode() + ", " + single.getCountryName();// + "\nLatitude: " +location.getLatitude() + "\nLongitude: " + location.getLongitude();
+//				L.m(this.address);
 				
 				LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this);
 			} catch (Exception e) {
@@ -147,5 +147,7 @@ public class LocationTrackerG extends Activity
 	public void disconnect(){
 		googleApiClient.disconnect();
 	}
+	
+	
 }
 							  
