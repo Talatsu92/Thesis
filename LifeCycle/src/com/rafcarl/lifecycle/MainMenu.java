@@ -28,6 +28,7 @@ public class MainMenu extends Activity {
 	SharedPreferences sharedPref = null;
 	SharedPreferences.Editor editor = null;
 	public static final String LOG = "MainMenu";
+	public static final String Blood = "bloodKey"; 
 	
 	//System Managers
 	SensorManager mSensorManager = null;
@@ -106,21 +107,6 @@ public class MainMenu extends Activity {
 		Intent intent = new Intent(this, ContactsMenu.class);
 		startActivity(intent);
 	}
-
-	public void goToHelp(View v){
-		Intent intent = new Intent(this, HelpMenu.class);
-		startActivity(intent);
-	}
-
-	public void goToTest(View v){
-		Intent intent = new Intent(this, SensorTest.class);
-		startActivity(intent);
-	}
-	
-	public void goToSMS(View v){
-		Intent intent = new Intent(this, SMSTest.class);
-		startActivity(intent);
-	}
 	
 	public void openAboutDialog(View v){
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -148,7 +134,7 @@ public class MainMenu extends Activity {
 		builder.setTitle("Pre-Monitor");
 		
 		LocationTrackerG lg = new LocationTrackerG(this);
-		
+
 		if(cursor.moveToFirst() == false){
 			builder.setMessage("You have not set any emergency contacts.");
 			builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
@@ -158,10 +144,23 @@ public class MainMenu extends Activity {
 					dialog.cancel();
 				}
 			});
+		} else if(!sharedPref.contains(Message.Blood) || !sharedPref.contains(Message.Anti)){
+			builder.setTitle("Set Blood Type");
+			builder.setMessage("This app requires the user's blood type.");
+			builder.setPositiveButton("User Menu", new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int which) {
+					Intent intent = new Intent(getApplicationContext(), UserMenu.class);
+					startActivity(intent);
+				}
+			});
 			
+			builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					dialog.cancel();
+				}
+			});
 		} else if(!lg.ifSettingsChecked()){
-			L.m("ifSettingsChecked() false"); 
-			
 			builder.setTitle("Set Location Sources");
 			builder.setMessage("This app requires the use of GPS and wireless networks enabled.");
 			builder.setPositiveButton("Settings", new DialogInterface.OnClickListener() {
@@ -177,7 +176,6 @@ public class MainMenu extends Activity {
 					dialog.cancel();
 				}
 			});
-
 		} else{
 			builder.setMessage(R.string.preMonitor);
 			builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {

@@ -9,6 +9,7 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -64,6 +65,7 @@ public class LocationTrackerG extends Activity
 	@Override
 	public void onConnected(Bundle arg0) {
 		L.m("onConnected() entered");
+//		LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
 		LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
 	}
 	

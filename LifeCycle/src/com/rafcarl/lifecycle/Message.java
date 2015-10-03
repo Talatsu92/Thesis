@@ -104,15 +104,17 @@ public class Message{
 	}
 	
 	public void sendMessage(Context context){		
-		StringBuilder blood = null;
+		StringBuilder msg = new StringBuilder("");
 		SharedPreferences sharedPref = context.getSharedPreferences(preferenceFile, Context.MODE_PRIVATE);
+		
+		StringBuilder blood = new StringBuilder("Blood Type: ");
 		if(sharedPref.contains(Blood)){	
 			switch(sharedPref.getInt(Blood, 0)){
-				case 1: blood = new StringBuilder("O"); break;
-				case 2: blood = new StringBuilder("A"); break;
-				case 3: blood = new StringBuilder("B"); break;
-				case 4: blood = new StringBuilder("AB"); break;
-				default: blood = new StringBuilder("");
+				case 1: blood.append("O"); break;
+				case 2: blood.append("A"); break;
+				case 3: blood.append("B"); break;
+				case 4: blood.append("AB"); break;
+				default: blood.append("");
 			}
 		}
 		if(sharedPref.contains(Anti)){	
@@ -122,19 +124,20 @@ public class Message{
 				default: blood.append("");
 			}
 		}
-		StringBuilder con = new StringBuilder();
+		
+		StringBuilder med = new StringBuilder("Medications: ");
+		if(sharedPref.contains(Meds)){
+			med.append(sharedPref.getString(Meds, ""));
+		}
+		
+		StringBuilder con = new StringBuilder("Conditions: ");
 		if(sharedPref.contains(Conds)){
-			con.append("Conditions: ");
 			con.append(sharedPref.getString(Conds, ""));
 		}
-		StringBuilder info = new StringBuilder();
-		if(sharedPref.contains(Meds)){
-			info.append("Medications: ");
-			info.append(sharedPref.getString(Meds, "") + "\n");
-		}
+		
+		StringBuilder allerg = new StringBuilder("Allergies: ");
 		if(sharedPref.contains(Allergs)){
-			info.append("Allergies: ");
-			info.append(sharedPref.getString(Allergs, ""));
+			allerg.append(sharedPref.getString(Allergs, ""));
 		}
 		
 		SmsManager sms = SmsManager.getDefault();
@@ -145,34 +148,34 @@ public class Message{
 		PendingIntent sentPi = PendingIntent.getBroadcast(context, 0, new Intent(sent), 0);
 		PendingIntent deliveredPi = PendingIntent.getBroadcast(context, 0, new Intent(delivered), 0);
 		
-//		ArrayList<String> parts = new ArrayList<String>();
-//		ArrayList<PendingIntent> sentPis = new ArrayList<PendingIntent>();
-//		ArrayList<PendingIntent> deliveredPis = new ArrayList<PendingIntent>();
+		ArrayList<String> parts = new ArrayList<String>();
+		ArrayList<PendingIntent> sentPis = new ArrayList<PendingIntent>();
+		ArrayList<PendingIntent> deliveredPis = new ArrayList<PendingIntent>();
 		
 		Contact contact = null;
 		
 		String phoneNumber = "";
 		String mapsLink = "http://maps.google.com/maps?daddr=" + String.valueOf(latitude)+ "," + String.valueOf(longitude) + "";
-		String additional = "My location: " + mapsLink;
+		String location = "My location: " + mapsLink;
 		
 		try {			
-			int i;
-			
-//			for(i = 0; i < 2; i++){
-//				sentPis.add(sentPi);
-//				deliveredPis.add(deliveredPi);
-//			}
-			
-			for(i = 0; i < contactList.size(); i++) {
+			for(int i = 0; i < contactList.size(); i++) {
 				contact = contactList.get(i);
 				phoneNumber = contact.getNumber();
-				
+								
 //				parts.clear();
-//				parts.add(contact.getMessage());
-//				parts.add(additional);
+//				sentPis.clear();
+//				deliveredPis.clear();
+//				msg.delete(0, msg.length());
+//				
+//				msg.append(contact.getMessage() + "\n");
+//				msg.append(location + "\n");
+//				msg.append(blood.toString() + "\n");
+//				msg.append(med.toString() + "\n");
+//				msg.append(con.toString() + "\n");
+//				msg.append(allerg.toString());
 				
 				context.registerReceiver(new BroadcastReceiver(){
-
 					@Override
 					public void onReceive(Context context, Intent intent) {
 						switch(getResultCode()){
@@ -209,13 +212,21 @@ public class Message{
 		                }
 		            }
 		        }, new IntentFilter(delivered));
-
+				
+//				parts = sms.divideMessage(msg.toString());
+				
+				
+//				for(int j = 0; j < parts.size(); j++){
+//					sentPis.add(sentPi);
+//					deliveredPis.add(deliveredPi);
+//				}
+				
 //				sms.sendMultipartTextMessage(phoneNumber, null, parts, sentPis, deliveredPis);
 				sms.sendTextMessage(phoneNumber, null, contact.getMessage(), sentPi, deliveredPi);
-				sms.sendTextMessage(phoneNumber, null, additional, sentPi, deliveredPi);
-				sms.sendTextMessage(phoneNumber, null, "Blood type: " + blood.toString() + "\n" + con.toString(), sentPi, deliveredPi);
-				sms.sendTextMessage(phoneNumber, null, info.toString(), sentPi, deliveredPi);
-				Thread.sleep(250);
+				sms.sendTextMessage(phoneNumber, null, location, sentPi, deliveredPi);
+				sms.sendTextMessage(phoneNumber, null, blood.toString() + "\n" + med.toString(), sentPi, deliveredPi);
+				sms.sendTextMessage(phoneNumber, null, con.toString() + allerg.toString(), sentPi, deliveredPi);
+				Thread.sleep(500);
 			}
 		} catch (InterruptedException e) {
 			e.printStackTrace();

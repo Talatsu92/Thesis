@@ -183,7 +183,6 @@ public class Monitor extends Activity implements SensorEventListener{
 	//Displays AlertDialog counting down from one minute
 		public void countDown(String address){
 			final LocationTrackerG locationTracker = new LocationTrackerG(context, address);
-			
 			final MediaPlayer mediaPlayer = MediaPlayer.create(context, R.raw.alarm);
 			
 			int result = am.requestAudioFocus(new OnAudioFocusChangeListener() {
@@ -194,10 +193,10 @@ public class Monitor extends Activity implements SensorEventListener{
 				}
 			}, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT);
 			
-			final CountDownTimer timer = new CountDownTimer(30000, 1000){
+			final CountDownTimer timer = new CountDownTimer(20000, 1000){
 				@Override
 				public void onTick(long millisUntilFinished) {
-					if((millisUntilFinished/1000) == 30){
+					if((millisUntilFinished/1000) == 20){
 						timerDialog.setMessage("00:30");
 					}
 					else if((millisUntilFinished/1000) < 10){
