@@ -141,6 +141,8 @@ public class Message{
 		}
 		
 		SmsManager sms = SmsManager.getDefault();
+		BroadcastReceiver br_sent = null;
+		BroadcastReceiver br_delivered = null;
 		
 		String sent = "SMS_SENT";
 		String delivered = "SMS_DELIVERED";
@@ -159,6 +161,47 @@ public class Message{
 		String location = "My location: " + mapsLink;
 		
 		try {			
+			br_sent = new BroadcastReceiver(){
+				@Override
+				public void onReceive(Context context, Intent intent) {
+					switch(getResultCode()){
+					case Activity.RESULT_OK:
+						Toast.makeText(context, "SMS sent", Toast.LENGTH_SHORT).show();
+						break;
+					case SmsManager.RESULT_ERROR_GENERIC_FAILURE:
+						Toast.makeText(context, "Generic failure",Toast.LENGTH_SHORT).show();
+						break;
+					case SmsManager.RESULT_ERROR_NO_SERVICE:
+						Toast.makeText(context, "No service", Toast.LENGTH_SHORT).show();
+						break;
+					case SmsManager.RESULT_ERROR_NULL_PDU:
+						Toast.makeText(context, "Null PDU", Toast.LENGTH_SHORT).show();
+						break;
+					case SmsManager.RESULT_ERROR_RADIO_OFF:
+						Toast.makeText(context, "Radio off", Toast.LENGTH_SHORT).show();
+						break;
+					}
+				}
+			};
+			
+			br_delivered = new BroadcastReceiver(){
+				@Override
+				public void onReceive(Context context, Intent intent) {
+					switch (getResultCode())
+					{
+					case Activity.RESULT_OK:
+						Toast.makeText(context, "SMS delivered", Toast.LENGTH_SHORT).show();
+						break;
+					case Activity.RESULT_CANCELED:
+						Toast.makeText(context, "SMS not delivered", Toast.LENGTH_SHORT).show();
+						break;                        
+					}
+				}
+			};
+			
+			context.registerReceiver(br_sent, new IntentFilter(sent));
+			context.registerReceiver(br_delivered, new IntentFilter(delivered));
+			
 			for(int i = 0; i < contactList.size(); i++) {
 				contact = contactList.get(i);
 				phoneNumber = contact.getNumber();
@@ -175,43 +218,6 @@ public class Message{
 //				msg.append(con.toString() + "\n");
 //				msg.append(allerg.toString());
 				
-				context.registerReceiver(new BroadcastReceiver(){
-					@Override
-					public void onReceive(Context context, Intent intent) {
-						switch(getResultCode()){
-							case Activity.RESULT_OK:
-			                    Toast.makeText(context, "SMS sent", Toast.LENGTH_SHORT).show();
-			                    break;
-			                case SmsManager.RESULT_ERROR_GENERIC_FAILURE:
-			                    Toast.makeText(context, "Generic failure",Toast.LENGTH_SHORT).show();
-			                    break;
-			                case SmsManager.RESULT_ERROR_NO_SERVICE:
-			                    Toast.makeText(context, "No service", Toast.LENGTH_SHORT).show();
-			                    break;
-			                case SmsManager.RESULT_ERROR_NULL_PDU:
-			                    Toast.makeText(context, "Null PDU", Toast.LENGTH_SHORT).show();
-			                    break;
-			                case SmsManager.RESULT_ERROR_RADIO_OFF:
-			                    Toast.makeText(context, "Radio off", Toast.LENGTH_SHORT).show();
-			                    break;
-						}
-					}
-				}, new IntentFilter(sent));
-				
-				context.registerReceiver(new BroadcastReceiver(){
-		            @Override
-		            public void onReceive(Context context, Intent intent) {
-		                switch (getResultCode())
-		                {
-		                    case Activity.RESULT_OK:
-		                        Toast.makeText(context, "SMS delivered", Toast.LENGTH_SHORT).show();
-		                        break;
-		                    case Activity.RESULT_CANCELED:
-		                        Toast.makeText(context, "SMS not delivered", Toast.LENGTH_SHORT).show();
-		                        break;                        
-		                }
-		            }
-		        }, new IntentFilter(delivered));
 				
 //				parts = sms.divideMessage(msg.toString());
 				
@@ -225,7 +231,7 @@ public class Message{
 				sms.sendTextMessage(phoneNumber, null, contact.getMessage(), sentPi, deliveredPi);
 				sms.sendTextMessage(phoneNumber, null, location, sentPi, deliveredPi);
 				sms.sendTextMessage(phoneNumber, null, blood.toString() + "\n" + med.toString(), sentPi, deliveredPi);
-				sms.sendTextMessage(phoneNumber, null, con.toString() + allerg.toString(), sentPi, deliveredPi);
+				sms.sendTextMessage(phoneNumber, null, con.toString() + "\n" + allerg.toString(), sentPi, deliveredPi);
 				Thread.sleep(500);
 			}
 		} catch (InterruptedException e) {
@@ -262,4 +268,5 @@ public class Message{
 		
 		return contactList;
 	}
+	
 }
