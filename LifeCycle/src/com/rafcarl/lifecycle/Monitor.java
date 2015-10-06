@@ -168,7 +168,7 @@ public class Monitor extends Activity implements SensorEventListener{
 				gyroSB.append("x: " + event.values[0] + "  y: " + event.values[1] + "  z: " + event.values[2] + "\r\n");
 				
 				//4.0f
-				if(Math.abs(event.values[0]) >= 6.28f || Math.abs(event.values[1]) >= 6.28f || Math.abs(event.values[2]) >= 6.28f){
+				if(Math.abs(event.values[0]) >= 4.0f || Math.abs(event.values[1]) >= 4.0f || Math.abs(event.values[2]) >= 4.0f){
 					rotation = true;
 					mSensorManager.unregisterListener(this, gyroscope);
 				}
@@ -250,7 +250,7 @@ public class Monitor extends Activity implements SensorEventListener{
 			timerDialog.show();
 			if(result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED){
 				L.m("Audio start");
-//				mediaPlayer.start();
+				mediaPlayer.start();
 			}
 			
 			timer.start();

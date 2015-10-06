@@ -137,11 +137,19 @@ public class MainMenu extends Activity {
 
 		if(cursor.moveToFirst() == false){
 			builder.setMessage("You have not set any emergency contacts.");
-			builder.setNeutralButton("OK", new DialogInterface.OnClickListener() {
+			builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					dialog.cancel();
+				}
+			});
+			builder.setPositiveButton("Contacts Menu", new DialogInterface.OnClickListener() {
+
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					Intent intent = new Intent(getApplicationContext(), ContactsMenu.class);
+					startActivity(intent);
 				}
 			});
 		} else if(!sharedPref.contains(Message.Blood) || !sharedPref.contains(Message.Anti)){
