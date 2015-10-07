@@ -1,0 +1,43 @@
+Carl
+-Explain the fields in User Data Storage
+-Why 4 text messages?
+-Mention Kangas et. al. Algorithm again in Methodology
+-Will you plan to publish this on Google Play?
+	-What about version and control?
+-Hardware Specifications
+	-Google Play detects hardware?
+
+Rafael
+-Justification for using Kangas et. al. Algorithm    ++
+-Justification for 10 Contacts limit  ++
+-Why 30secs wait? ++
+-Include accident summary scenarios ++
+-Usually common accidents ++
+-Break down the Algorithm more ++
+-Decompose each application module into smaller subsections ++
+-Insert Line #s and Figure #s to Pseudocode ++
+-Mention that the research is specifically limited to Samsung S3 ++
+
+
+Figure 4.3.1.1 ContactsMenu class Pseudocode 19
+Figure 4.3.2.1 Detection and Notification Flowchart 20
+Figure 4.3.2.2 Monitor class Pseudocode 20
+Figure 4.3.3.1 Google Play Services & Location API 22
+Figure 4.3.3.2 LocationTracker class Pseudocode 22
+Figure 4.3.4.1 Message class Pseudocode 23
+Figure 4.3.5.1 Application General Screen Flow 24
+Figure 4.3.5.2 Accident Detected Dialog 24
+Figure 4.3.5.3 Contact Number Dialog 25
+Figure 4.4.1 Samsung Galaxy S3 Mini SM-G730A with Ballistic Hard Case 26
+Figure 4.4.2 Physical test environment 26
+Figure 4.4.3 Four fall orientations for testing 27
+Figure 4.4.4 Right orientation accelerometer data 30
+Figure 4.4.5 Number of Associates with Motorcycles 32
+Figure 4.4.6 Recommendation of this Application to Associates 32
+Figure 4.4.7 Perception of Ambulance Response Time 33
+Figure 4.4.8 Perception of Ambulance Arrival Time 33
+
+27 four orientations 20 trials
+Table 4.4.5 Accident Detection Performance Evaluation Metrics
+Table 4.4.6 Location Tracking Performance Evaluation Metrics
+Table 4.4.7 Messaging Performance Evaluation Metrics
